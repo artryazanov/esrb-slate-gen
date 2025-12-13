@@ -19,27 +19,36 @@ export class RenderService {
     }
   }
 
-  public async generate(data: ESRBData, outputPath: string): Promise<void> {
+  public async generate(data: ESRBData, outputPath: string, margin: number = 0): Promise<void> {
     const canvas = createCanvas(this.WIDTH, this.HEIGHT);
     const ctx = canvas.getContext('2d');
 
-    // 1. Black background
+    // 1. Black background (fills entire screen)
     ctx.fillStyle = '#000000';
     ctx.fillRect(0, 0, this.WIDTH, this.HEIGHT);
 
     // Layout Constants
-    const boxWidth = 1300;
-    const boxHeight = 650;
-    const boxX = (this.WIDTH - boxWidth) / 2;
+    const boxWidth = this.WIDTH - (margin * 2);
+    // Enforce 16:9 Aspect Ratio
+    const boxHeight = boxWidth * (9 / 16);
+
+    const boxX = margin;
+    // Center vertically
     const boxY = (this.HEIGHT - boxHeight) / 2;
 
-    // New design constants
-    const frameThickness = 24;
-    const frameMargin = 10;  // Distance from white box edge to frame edge
-    const iconPadding = 4;   // "Almost touches" the white box edges
-    const textPadding = 20;  // From icon right edge to text
-    const fontSize = 75;     // Increased font size
-    const lineHeight = 85;   // Increased line height
+    // Use 650 as the "reference height" for scaling elements
+    // Previous fixed height was 650.
+    const referenceHeight = 650;
+    const scaleFactor = boxHeight / referenceHeight;
+
+    // Scaled design constants
+    const frameThickness = 24 * scaleFactor;
+    const frameMargin = 10 * scaleFactor;
+    const iconPadding = 4 * scaleFactor;
+    const textPadding = 20 * scaleFactor;
+    const fontSize = 75 * scaleFactor;
+    const lineHeight = 85 * scaleFactor;
+    const rightPadding = 20 * scaleFactor;
 
     // 2. Main White Container
     ctx.fillStyle = '#FFFFFF';
@@ -48,7 +57,7 @@ export class RenderService {
     // 3. Load & Draw Icon (Left Side)
     // We prioritize the SVG and scale it up to prevent blurriness
     let iconPath = path.join(this.ASSETS_DIR, `icons/${data.ratingCategory}.svg`);
-    // Fallback to PNG if SVG missing (though requirement implies SVG usage)
+    // Fallback to PNG if SVG missing
     if (!fs.existsSync(iconPath)) {
       iconPath = path.join(this.ASSETS_DIR, `icons/${data.ratingCategory}.png`);
     }
@@ -108,17 +117,11 @@ export class RenderService {
     ctx.drawImage(iconImage, iconX, iconY, iconW, iconH);
 
     // 4. Draw Black Frame
-    // 18px thickness, 18px from edges of white box
+    // Thickness and margin scaled logic
     const frameX = boxX + frameMargin;
     const frameY = boxY + frameMargin;
     const frameW = boxWidth - (frameMargin * 2);
     const frameH = boxHeight - (frameMargin * 2);
-
-    // We can draw this by stroking a rectangle, but stroke is centered on path.
-    // If we stroke with lineWidth = 18, the path should be inset by `frameMargin + frameThickness/2`.
-    // Or simpler: fill two rects (outer and inner transparent?) No, we need to draw ON TOP of the icon.
-    // So we stroke.
-    // To have the outer edge of the stroke be at `frameMargin`, the path needs to be at `frameMargin + frameThickness/2`.
 
     ctx.beginPath();
     const halfStroke = frameThickness / 2;
@@ -141,8 +144,6 @@ export class RenderService {
     // Frame inner right edge is: boxX + boxWidth - frameMargin - frameThickness
     const frameInnerRight = boxX + boxWidth - frameMargin - frameThickness;
 
-    // Add some padding from the right frame edge as well for safety
-    const rightPadding = 20;
     const maxTextWidth = frameInnerRight - textX - rightPadding;
 
     ctx.fillStyle = '#000000';

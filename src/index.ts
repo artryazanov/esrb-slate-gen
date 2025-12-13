@@ -13,9 +13,10 @@ program
   .requiredOption('-g, --game <title>', 'Game title')
   .option('-p, --platform <platform>', 'Game platform (optional)')
   .option('-o, --output <path>', 'Output file path', 'output.png')
+  .option('-m, --margin <number>', 'Margin from screen edges (default: 0)', '0')
   .action(async (options) => {
     try {
-      const { game, platform, output } = options;
+      const { game, platform, output, margin } = options;
 
       const scraper = new ScraperService();
       const renderer = new RenderService();
@@ -25,7 +26,7 @@ program
       const data = await scraper.getGameData(game, platform);
 
       const outputPath = path.resolve(process.cwd(), output);
-      await renderer.generate(data, outputPath);
+      await renderer.generate(data, outputPath, parseInt(margin, 10));
 
       Logger.info('Done.');
     } catch (error) {
