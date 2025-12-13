@@ -29,33 +29,69 @@ export class ScraperService {
       }
 
       let targetGame: cheerio.Cheerio<any> | null = null;
+      const normalizedQuery = this.normalize(query);
+      const normalizedPlatform = platform ? this.normalize(platform) : null;
 
-      if (platform) {
-        gameResults.each((i, el) => {
-            const currentElement = $(el);
-            const platformsText = currentElement.find('.platforms').text().toLowerCase();
-            const titleText = currentElement.find('.heading a').text().trim().toLowerCase();
+      const candidates: { element: cheerio.Cheerio<any>, title: string, platforms: string }[] = [];
 
-            // Check if platform matches and title matches (fuzzy match logic could be better, but simple substring for now)
-            if (platformsText.includes(platform.toLowerCase()) && titleText.includes(query.toLowerCase())) {
-                 if (!targetGame) targetGame = currentElement;
-            }
-        });
+      gameResults.each((i, el) => {
+        const currentElement = $(el);
+        const titleText = this.normalize(currentElement.find('.heading a').text());
+        const platformsText = this.normalize(currentElement.find('.platforms').text());
+        candidates.push({ element: currentElement, title: titleText, platforms: platformsText });
+      });
+
+      // 1. Try to find an EXACT match
+      let exactMatch = candidates.find(c => {
+        const titleMatch = c.title === normalizedQuery;
+        const platformMatch = normalizedPlatform ? c.platforms.includes(normalizedPlatform) : true;
+        return titleMatch && platformMatch;
+      });
+
+      // If exact match not found with platform, try exact match without platform constraint? 
+      // No, user said "in result of search". The search itself might filter by platform if we strictly followed existing logic 
+      // where we check platform manually. 
+      // The previous logic filtered by platform MANUALLY in the loop. 
+      // "Check if platform matches and title matches".
+      // So I should valid candidates by platform first if platform is provided.
+
+      const platformFilteredCandidates = normalizedPlatform
+        ? candidates.filter(c => c.platforms.includes(normalizedPlatform))
+        : candidates;
+
+      // 1. Exact Title Match within platform-filtered candidates
+      exactMatch = platformFilteredCandidates.find(c => c.title === normalizedQuery);
+
+      if (exactMatch) {
+        targetGame = exactMatch.element;
+      } else {
+        // 2. Partial Title Match (existing behavior)
+        const partialMatch = platformFilteredCandidates.find(c => c.title.includes(normalizedQuery));
+        if (partialMatch) {
+          targetGame = partialMatch.element;
+        }
       }
 
-      // If no platform specific match found, or no platform provided, pick the first one that matches the title
-      if (!targetGame) {
-          gameResults.each((i, el) => {
-              const currentElement = $(el);
-              const titleText = currentElement.find('.heading a').text().trim().toLowerCase();
-              if (titleText.includes(query.toLowerCase())) {
-                  if (!targetGame) targetGame = currentElement;
-                  return false; // break
-              }
-          });
+      // 3. Fallback to platform-filtered specific logic if above didn't find anything?
+      // Actually previous logic had a fallback: 
+      // "If no platform specific match found... pick the first one that matches the title [ignoring platform]"
+      // Let's replicate this "Second Chance" logic.
+
+      if (!targetGame && normalizedPlatform) {
+        // Try to find exact match ignoring platform
+        const exactMatchNoPlatform = candidates.find(c => c.title === normalizedQuery);
+        if (exactMatchNoPlatform) {
+          targetGame = exactMatchNoPlatform.element;
+        } else {
+          // Try partial match ignoring platform
+          const partialMatchNoPlatform = candidates.find(c => c.title.includes(normalizedQuery));
+          if (partialMatchNoPlatform) {
+            targetGame = partialMatchNoPlatform.element;
+          }
+        }
       }
 
-      // Fallback: just take the first result
+      // 4. Ultimate Fallback: just take the first result
       if (!targetGame) {
         targetGame = gameResults.first();
         Logger.warn(`Specific match not found. Using top result: ${targetGame.find('.heading a').text()}`);
@@ -70,10 +106,10 @@ export class ScraperService {
 
       // Clean descriptors
       const cleanDescriptors = descriptorsText
-       .replace(/^Content Descriptors:\s*/i, '')
-       .split(/,\s*/)
-       .map(d => d.trim())
-       .filter(d => d.length > 0);
+        .replace(/^Content Descriptors:\s*/i, '')
+        .split(/,\s*/)
+        .map(d => d.trim())
+        .filter(d => d.length > 0);
 
       Logger.info(`Found: ${title} [${ratingCategory}]`);
 
@@ -99,5 +135,9 @@ export class ScraperService {
     if (filename.includes('ao.svg')) return 'AO';
     if (filename.includes('rp.svg')) return 'RP';
     return 'RP';
+  }
+
+  private normalize(text: string): string {
+    return text.trim().toLowerCase().replace(/\s+/g, ' ');
   }
 }
