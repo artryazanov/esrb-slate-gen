@@ -1,4 +1,4 @@
-import { createCanvas, loadImage, registerFont, CanvasRenderingContext2D, Image } from 'canvas';
+import { createCanvas, loadImage, registerFont } from 'canvas';
 import { ESRBData } from '../interfaces';
 import fs from 'fs';
 import path from 'path';
@@ -8,16 +8,6 @@ export class RenderService {
   private readonly WIDTH = 1920;
   private readonly HEIGHT = 1080;
   private readonly ASSETS_DIR = path.join(__dirname, '../../assets');
-
-  // Rating Text Mapping
-  private readonly RATING_TEXTS: Record<string, string> = {
-    'E': 'EVERYONE',
-    'E10plus': 'EVERYONE 10+',
-    'T': 'TEEN',
-    'M': 'MATURE 17+',
-    'AO': 'ADULTS ONLY 18+',
-    'RP': 'RATING PENDING'
-  };
 
   constructor() {
     // Try to register custom font if exists, otherwise rely on system font
@@ -39,37 +29,19 @@ export class RenderService {
 
     // Layout Constants
     const boxWidth = 1300;
-    const boxHeight = 650; // Approximated from aspect ratio
+    const boxHeight = 650;
     const boxX = (this.WIDTH - boxWidth) / 2;
     const boxY = (this.HEIGHT - boxHeight) / 2;
-    const borderThickness = 6;
-    const padding = 40; // Inner padding
+    const padding = 50;
 
-    // 2. Main White Border
-    ctx.strokeStyle = '#FFFFFF';
-    ctx.lineWidth = borderThickness;
-    ctx.strokeRect(boxX, boxY, boxWidth, boxHeight);
-
-    // 3. Header Text ("MATURE 17+")
-    const ratingText = this.RATING_TEXTS[data.ratingCategory] || data.ratingCategory.toUpperCase();
+    // 2. Main White Container
     ctx.fillStyle = '#FFFFFF';
-    ctx.font = 'bold 72px "SlateFont", Arial, sans-serif'; // Large header font
-    ctx.textBaseline = 'top';
-    ctx.textAlign = 'left';
+    ctx.fillRect(boxX, boxY, boxWidth, boxHeight);
 
-    // Position header just inside the box
-    const headerY = boxY + padding;
-    ctx.fillText(ratingText, boxX + padding, headerY);
-
-    // Measure header height for content offset
-    const headerHeight = 90;
-
-    // 4. Content Area (Icon + Descriptors)
-    const contentY = headerY + headerHeight;
-    const contentHeight = boxHeight - (padding * 2) - headerHeight - 60; // 60 for footer
-
-    // 5. Load Icon
+    // 3. Load & Draw Icon (Left Side)
+    // We prioritize the SVG and scale it up to prevent blurriness
     let iconPath = path.join(this.ASSETS_DIR, `icons/${data.ratingCategory}.svg`);
+    // Fallback to PNG if SVG missing (though requirement implies SVG usage)
     if (!fs.existsSync(iconPath)) {
          iconPath = path.join(this.ASSETS_DIR, `icons/${data.ratingCategory}.png`);
     }
@@ -78,68 +50,86 @@ export class RenderService {
       throw new Error(`Icon file not found for category ${data.ratingCategory}`);
     }
 
-    const icon = await loadImage(iconPath);
+    // Determine target dimensions for the icon
+    // It should fit within the box height minus padding
+    const maxIconHeight = boxHeight - (padding * 2);
 
-    // 6. Draw Icon (Cropped)
-    // The retail icon has text on top and bottom. We want the middle part.
-    // Assumptions based on standard ESRB retail badge (vertical rect):
-    // Text ~15%, Icon ~70%, Text ~15%.
-    // We want to draw just the "Icon" part.
-    // However, for the "Trailer Slate", it usually looks like a White Box with the Black Letter.
-    // The retail SVG is Black Letter on White Background.
-    // So if we crop it, we get exactly that.
+    let iconImage: any;
+    let iconW = 0;
+    let iconH = 0;
 
-    const cropYPercent = 0.16; // Skip top 16% (Text)
-    const cropHeightPercent = 0.60; // Take middle 60%
-    const cropXPercent = 0.0;
-    const cropWidthPercent = 1.0;
+    if (iconPath.endsWith('.svg')) {
+        const svgContent = fs.readFileSync(iconPath, 'utf-8');
 
-    const sX = icon.width * cropXPercent;
-    const sY = icon.height * cropYPercent;
-    const sW = icon.width * cropWidthPercent;
-    const sH = icon.height * cropHeightPercent;
+        // Extract original dimensions to calculate Aspect Ratio
+        const wMatch = svgContent.match(/width="([^"]+)"/);
+        const hMatch = svgContent.match(/height="([^"]+)"/);
 
-    // Destination
-    const iconDestH = contentHeight;
-    // Maintain aspect ratio of the CROP
-    const cropAspectRatio = (sW as number) / (sH as number);
-    const iconDestW = iconDestH * cropAspectRatio;
+        let originalW = 100;
+        let originalH = 100;
 
-    const iconDestX = boxX + padding;
-    const iconDestY = contentY;
+        if (wMatch && hMatch) {
+            originalW = parseFloat(wMatch[1]);
+            originalH = parseFloat(hMatch[1]);
+        }
 
-    // Draw the cropped image
-    // Note: sW/sH are usually needed to be accurate.
-    // Canvas drawImage(image, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight)
-    ctx.drawImage(icon, sX, sY, sW, sH, iconDestX, iconDestY, iconDestW, iconDestH);
+        const ar = originalW / originalH;
 
-    // 7. Divider Line
-    const dividerX = iconDestX + iconDestW + 40;
+        // Calculate target width based on height constraint
+        iconH = maxIconHeight;
+        iconW = iconH * ar;
+
+        // Modify SVG string to force high-resolution rasterization
+        // We replace the width/height attributes with our target pixel values
+        const modifiedSvg = svgContent
+            .replace(/width="([^"]+)"/, `width="${iconW}"`)
+            .replace(/height="([^"]+)"/, `height="${iconH}"`);
+
+        iconImage = await loadImage(Buffer.from(modifiedSvg));
+    } else {
+        // Fallback for PNG (might be blurry)
+        iconImage = await loadImage(iconPath);
+        const ar = iconImage.width / iconImage.height;
+        iconH = maxIconHeight;
+        iconW = iconH * ar;
+    }
+
+    const iconX = boxX + padding;
+    const iconY = boxY + padding;
+
+    ctx.drawImage(iconImage, iconX, iconY, iconW, iconH);
+
+    // 4. Divider Line (Black)
+    // Positioned after the icon with some spacing
+    const spacing = 50;
+    const dividerX = iconX + iconW + spacing;
+
     ctx.beginPath();
-    ctx.moveTo(dividerX, contentY + 20);
-    ctx.lineTo(dividerX, contentY + contentHeight - 20);
-    ctx.lineWidth = 4;
-    ctx.strokeStyle = '#FFFFFF';
+    ctx.moveTo(dividerX, boxY + padding);
+    ctx.lineTo(dividerX, boxY + boxHeight - padding);
+    ctx.lineWidth = 5;
+    ctx.strokeStyle = '#000000';
     ctx.stroke();
 
-    // 8. Descriptors
-    const textX = dividerX + 40;
+    // 5. Descriptors (Right Side)
+    // Black Text
+    const textX = dividerX + spacing;
     const maxTextWidth = (boxX + boxWidth) - textX - padding;
 
-    ctx.fillStyle = '#FFFFFF';
-    ctx.font = 'bold 40px "SlateFont", Arial, sans-serif';
+    ctx.fillStyle = '#000000';
+    ctx.font = 'bold 54px "SlateFont", Arial, sans-serif';
     ctx.textBaseline = 'top';
+    ctx.textAlign = 'left'; // Reset alignment
 
-    const lineHeight = 50;
-    // Center text vertically in the available content space?
-    // Or start from top? Usually top aligned with the icon.
-    // But let's center the block of text vertically relative to the content area.
+    const lineHeight = 65;
+
+    // Calculate total height of text block to center it vertically
     const totalTextHeight = data.descriptors.length * lineHeight;
-    let textY = contentY + (contentHeight - totalTextHeight) / 2;
+    let textY = boxY + (boxHeight - totalTextHeight) / 2;
 
-    // If text block is taller than content area (rare), clamp to top
-    if (totalTextHeight > contentHeight) {
-        textY = contentY;
+    // Safety: don't go above top padding
+    if (textY < boxY + padding) {
+        textY = boxY + padding;
     }
 
     data.descriptors.forEach(desc => {
@@ -147,22 +137,7 @@ export class RenderService {
       textY += lineHeight;
     });
 
-    // 9. Footer
-    // "ESRB CONTENT RATING" (Left)
-    // "www.esrb.org" (Right)
-    const footerY = boxY + boxHeight - padding;
-
-    ctx.font = 'bold 36px "SlateFont", Arial, sans-serif'; // Slightly smaller/different
-    ctx.fillStyle = '#FFFFFF';
-    ctx.textBaseline = 'bottom';
-
-    ctx.textAlign = 'left';
-    ctx.fillText('ESRB CONTENT RATING', boxX + padding, footerY);
-
-    ctx.textAlign = 'right';
-    ctx.fillText('www.esrb.org', boxX + boxWidth - padding, footerY);
-
-    // 10. Save
+    // 6. Save
     const buffer = canvas.toBuffer('image/png');
     fs.writeFileSync(outputPath, buffer);
     Logger.info(`Slate saved to ${outputPath}`);
