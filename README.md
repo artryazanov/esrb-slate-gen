@@ -29,7 +29,7 @@ A Node.js-based tool for automatically generating broadcast-compliant ESRB Ratin
     ```bash
     docker run --rm -v $(pwd):/output esrb-gen \
       --game "Borderlands 2" \
-      --platform "Windows PC" \
+      --platform "PC" \
       --output "/output/result.png"
     ```
 

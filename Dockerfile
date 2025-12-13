@@ -46,9 +46,5 @@ COPY --from=build /app/package.json ./
 # Copy assets (downloaded in build stage)
 COPY --from=build /app/assets ./assets
 
-# Create non-root user
-RUN groupadd -r esrbuser && useradd -r -g esrbuser esrbuser
-USER esrbuser
-
 ENTRYPOINT ["node", "dist/index.js"]
 CMD ["--help"]
