@@ -129,7 +129,7 @@ export class ScraperService {
   private extractRatingFromUrl(url: string): string {
     const filename = url.split('/').pop()?.toLowerCase() || '';
     if (filename.includes('e.svg') || filename.includes('e.png')) return 'E';
-    if (filename.includes('e10plus') || filename.includes('everyone 10')) return 'E10plus';
+    if (filename.includes('e10plus') || filename.includes('everyone 10') || filename.includes('e10+')) return 'E10plus';
     if (filename.includes('t.svg') || filename.includes('teen')) return 'T';
     if (filename.includes('m.svg') || filename.includes('mature')) return 'M';
     if (filename.includes('ao.svg')) return 'AO';
