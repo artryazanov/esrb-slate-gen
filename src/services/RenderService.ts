@@ -27,7 +27,7 @@ export class RenderService {
     const ctx = canvas.getContext('2d');
 
     // 1. Black background (fills entire screen)
-    ctx.fillStyle = '#000000';
+    ctx.fillStyle = '#1A1818';
     ctx.fillRect(0, 0, canvasWidth, canvasHeight);
 
     // Layout Constants
@@ -45,7 +45,7 @@ export class RenderService {
     const scaleFactor = boxHeight / referenceHeight;
 
     // Scaled design constants
-    const frameThickness = 24 * scaleFactor;
+    const frameThickness = 22 * scaleFactor;
     const frameMargin = 10 * scaleFactor;
     const iconPadding = 4 * scaleFactor;
     const textPadding = 20 * scaleFactor;
@@ -135,9 +135,8 @@ export class RenderService {
       frameH - frameThickness
     );
     ctx.lineWidth = frameThickness;
-    ctx.strokeStyle = '#000000';
+    ctx.strokeStyle = '#1A1818';
     ctx.stroke();
-
 
     // 5. Descriptors (Right Side)
     // Positioned relative to the icon's visual right edge (which is iconX + iconW)
@@ -149,7 +148,7 @@ export class RenderService {
 
     const maxTextWidth = frameInnerRight - textX - rightPadding;
 
-    ctx.fillStyle = '#000000';
+    ctx.fillStyle = '#1A1818';
     ctx.font = `bold ${fontSize}px "SlateFont", Arial, sans-serif`;
     ctx.textBaseline = 'top';
     ctx.textAlign = 'left';
