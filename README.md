@@ -26,7 +26,7 @@ A Node.js-based tool for automatically generating broadcast-compliant ESRB Ratin
 2.  **Run the generator:**
     Mount the current directory to `/output` inside the container to save the file locally.
     ```bash
-    docker run --rm -v $(pwd):/output esrb-gen \
+    docker run --rm -v $(pwd)/output:/output esrb-gen \
       --game "Borderlands 2" \
       --platform "PC" \
       --output "/output/my-slate.png"
