@@ -19,22 +19,25 @@ export class RenderService {
     }
   }
 
-  public async generate(data: ESRBData, outputPath: string, margin: number = 0): Promise<void> {
-    const canvas = createCanvas(this.WIDTH, this.HEIGHT);
+  public async generate(data: ESRBData, outputPath: string, margin: number = 0, is4k: boolean = false): Promise<void> {
+    const canvasWidth = is4k ? 3840 : 1920;
+    const canvasHeight = is4k ? 2160 : 1080;
+
+    const canvas = createCanvas(canvasWidth, canvasHeight);
     const ctx = canvas.getContext('2d');
 
     // 1. Black background (fills entire screen)
     ctx.fillStyle = '#000000';
-    ctx.fillRect(0, 0, this.WIDTH, this.HEIGHT);
+    ctx.fillRect(0, 0, canvasWidth, canvasHeight);
 
     // Layout Constants
-    const boxWidth = this.WIDTH - (margin * 2);
+    const boxWidth = canvasWidth - (margin * 2);
     // Enforce 16:9 Aspect Ratio
     const boxHeight = boxWidth * (9 / 16);
 
     const boxX = margin;
     // Center vertically
-    const boxY = (this.HEIGHT - boxHeight) / 2;
+    const boxY = (canvasHeight - boxHeight) / 2;
 
     // Use 650 as the "reference height" for scaling elements
     // Previous fixed height was 650.

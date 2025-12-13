@@ -14,19 +14,22 @@ program
   .option('-p, --platform <platform>', 'Game platform (optional)')
   .option('-o, --output <path>', 'Output file path', 'output.png')
   .option('-m, --margin <number>', 'Margin from screen edges (default: 0)', '0')
+  .option('--4k', 'Generate in 4K resolution (3840x2160)')
   .action(async (options) => {
     try {
       const { game, platform, output, margin } = options;
+      const is4k = !!options['4k'];
 
       const scraper = new ScraperService();
       const renderer = new RenderService();
 
       Logger.info(`Starting process for game: "${game}"` + (platform ? ` on platform: "${platform}"` : ''));
+      if (is4k) Logger.info('Resolution: 4K (3840x2160)');
 
       const data = await scraper.getGameData(game, platform);
 
       const outputPath = path.resolve(process.cwd(), output);
-      await renderer.generate(data, outputPath, parseInt(margin, 10));
+      await renderer.generate(data, outputPath, parseInt(margin, 10), is4k);
 
       Logger.info('Done.');
     } catch (error) {
