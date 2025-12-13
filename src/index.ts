@@ -1,4 +1,5 @@
 import { Command } from 'commander';
+import fs from 'fs';
 import path from 'path';
 import { ScraperService } from './services/ScraperService';
 import { RenderService } from './services/RenderService';
@@ -12,7 +13,7 @@ program
   .version('1.0.0')
   .requiredOption('-g, --game <title>', 'Game title')
   .option('-p, --platform <platform>', 'Game platform (optional)')
-  .option('-o, --output <path>', 'Output file path', 'output.png')
+  .option('-o, --output <path>', 'Output file path', 'output/output.png')
   .option('-m, --margin <number>', 'Margin from screen edges (default: 0)', '0')
   .option('--4k', 'Generate in 4K resolution (3840x2160)')
   .action(async (options) => {
@@ -29,6 +30,13 @@ program
       const data = await scraper.getGameData(game, platform);
 
       const outputPath = path.resolve(process.cwd(), output);
+
+      // Ensure output directory exists
+      const outputDir = path.dirname(outputPath);
+      if (!fs.existsSync(outputDir)) {
+        fs.mkdirSync(outputDir, { recursive: true });
+      }
+
       await renderer.generate(data, outputPath, parseInt(margin, 10), is4k);
 
       Logger.info('Done.');
