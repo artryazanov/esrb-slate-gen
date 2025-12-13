@@ -18,7 +18,6 @@ A Node.js-based tool for automatically generating broadcast-compliant ESRB Ratin
 ## Usage
 
 ### Using Docker (Recommended)
-
 1.  **Build the image:**
     ```bash
     docker build -t esrb-gen .
@@ -30,7 +29,7 @@ A Node.js-based tool for automatically generating broadcast-compliant ESRB Ratin
     docker run --rm -v $(pwd):/output esrb-gen \
       --game "Borderlands 2" \
       --platform "PC" \
-      --output "/output/result.png"
+      --output "/output/my-slate.png"
     ```
 
 ### Local Development
@@ -51,8 +50,9 @@ A Node.js-based tool for automatically generating broadcast-compliant ESRB Ratin
 
 3.  **Run the CLI:**
     ```bash
-    npx ts-node src/index.ts -g "Borderlands 2" -o test.png
+    npx ts-node src/index.ts -g "Borderlands 2"
     ```
+    *This will save the image to `output/output.png` by default.*
 
 ## CLI Options
 
@@ -60,7 +60,9 @@ A Node.js-based tool for automatically generating broadcast-compliant ESRB Ratin
 | :--- | :--- | :--- | :--- | :--- |
 | `--game` | `-g` | Game title to search for | Yes | - |
 | `--platform` | `-p` | Specific platform (e.g., "Xbox", "PS5") | No | - |
-| `--output` | `-o` | Output file path | No | `output.png` |
+| `--output` | `-o` | Output file path | No | `output/output.png` |
+| `--margin` | `-m` | Horizontal margin (white box indentation) | No | `0` (Full Screen) |
+| `--4k` | | Generate in 4K resolution (3840x2160) | No | `false` |
 
 ## Testing
 
@@ -78,4 +80,4 @@ npm test
 
 ## License
 
-MIT
+This project is released under the [Unlicense](LICENSE).
