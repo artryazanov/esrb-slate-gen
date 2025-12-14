@@ -92,7 +92,12 @@ export class RenderService {
     // Center vertically
     const startY = (canvasHeight - totalBoxHeight) / 2;
 
-    const hasInteractive = data.interactiveElements && data.interactiveElements.length > 0;
+    // Filter out "Not Rated by the ESRB" from interactive elements
+    const filteredInteractive = (data.interactiveElements || []).filter(el =>
+      !el.toLowerCase().includes('not rated by the esrb')
+    );
+
+    const hasInteractive = filteredInteractive.length > 0;
 
     // Determine heights
     let mainBoxHeight = totalBoxHeight;
@@ -299,7 +304,7 @@ export class RenderService {
 
       // Draw Text
       // Centered?
-      const interactText = data.interactiveElements.slice(0, 3).join(', '); // Limit to 3 lines/items?
+      const interactText = filteredInteractive.slice(0, 3).join(', '); // Limit to 3 lines/items?
       // User examples: "Users Interact", "In-Game Purchases".
       // Font size? slightly smaller to ensure fit?
       // Or same size.
