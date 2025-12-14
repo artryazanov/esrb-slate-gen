@@ -197,30 +197,11 @@ export class RenderService {
     ctx.fillRect(0, 0, canvasWidth, canvasHeight);
 
     // If No Descriptors case
-    // NOTE: The user's request didn't explicitly specify how "No Descriptors" should handle aspect ratio in variable width mode.
-    // However, existing code fills the screen.
-    // If variable width, we might want to just keep it simple or follow the 1080 height rule.
-    // Let's stick to the current logic for "No Descriptors" which is centering the icon, but apply the canvas size logic we just calculated.
-    // Actually, "No Descriptors" is a special case that often ignores the "slate" layout. 
-    // BUT if we want variable width support for it, we should respect the canvas creation.
-
+    // Special handling for "No Descriptors" case.
+    // Preserving variable width/canvas sizing logic calculated above, 
+    // ensuring consistency with the "auto" aspect ratio determination (likely 21:9 if empty).
+    // The visual output will center the icon on the calculated canvas.
     if (data.descriptors.length === 1 && data.descriptors[0] === 'No Descriptors') {
-      // Re-create canvas if we went down the path of calculating metrics but this is a special case?
-      // Actually "No Descriptors" usually ignores aspect ratio in the legacy code
-      // (it just draws icon centered on black/white background).
-      // If we are in variable width mode, we should probably still use the calculated canvas size?
-      // Or should "No Descriptors" always be 16:9?
-      // The prompt says "Auto mode... iterates values...". "No Descriptors" doesn't have text to fit.
-      // Let's assume for "No Descriptors", "auto" defaults to 16:9 (standard) unless specified otherwise.
-      // Effectively, if heightFactor was auto (0), it likely defaulted to 21:9 in the loop calculation because descriptors loop was empty/didn't fail?
-      // Wait, data.descriptors has 1 item "No Descriptors".
-      // It might fit in 16:9.
-
-      // Let's keep the existing "No Descriptors" block but use the initialized canvas.
-      // Actually the legacy code returned EARLY for no descriptors. 
-      // We should probably move that check up or adapt it.
-      // Given the complexity, let's just use the calculated canvas size.
-
       // Logic for No Descriptors:
       let iconPath = path.join(this.ASSETS_DIR, `icons/${data.ratingCategory}.svg`);
       if (!fs.existsSync(iconPath)) {
@@ -230,15 +211,8 @@ export class RenderService {
       if (fs.existsSync(iconPath)) {
         // Draw background again just to be safe if we are here (though we just did)
         if (isVariableWidth) {
-          ctx.fillStyle = '#FFFFFF'; // Should this be white or black for No Descriptors? 
-          // Legacy was Black.
-          // But for Variable Width (full screen content), maybe White?
-          // The "No Descriptors" usually implies the "E" icon on black/white.
-          // Let's stick to Black for No Descriptors as it was hardcoded before, UNLESS the user implies strictly "no black bars".
-          // User said "black bars must not exist".
-          // If we make it white, it's consistent.
-          // However, standard ESRB often has black bg for that slate?
-          // Let's assume white for consistency with "variable width = no black bars" rule.
+          // For Variable Width mode, using White background to maintain "no black bars" consistency.
+          // Legacy mode remains Black.
           ctx.fillStyle = '#FFFFFF';
         } else {
           ctx.fillStyle = '#1A1818';

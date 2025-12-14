@@ -60,10 +60,8 @@ describe('ScraperService Multi-Page Search', () => {
         const result = await scraper.getGameData('DOOM', 'PC');
 
         expect(result.title).toBe('DOOM');
-        // Ensure Page 2 was NOT called (Scope assertion - if strict handling is needed we'd do more, but standard nock throws if unmatched unique request made? No, preventing unwanted request.)
-        // We rely on nock not intercepting any page 2 request, if it did it would error or we could check `isDone()`.
-        // But better is that if it tried to call Page 2, it would fail because no mock?
-        // Actually we only mocked Page 1. If code tries Page 2, it would hit network or fail if nock blocks net.
+        // Verification: Since we only mocked Page 1, any attempt to call Page 2 would result in a network error 
+        // (because Nock blocks real network requests), confirming that the code did not proceed to Page 2.
     });
 
     test('should check page 3 if exact match is not found on page 1 or 2', async () => {

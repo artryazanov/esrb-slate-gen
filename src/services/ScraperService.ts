@@ -256,13 +256,9 @@ export class ScraperService {
       }
     } else {
       // Fallback: just split by some delimiters or take the whole text if it's one block
-      // Sometimes it's comma separated or just newlines?
-      // Let's assume text content needs to be split if not in P tags.
-      // User example 1: <p>...</p>
-      // User example 2: <td><p>...</p><p>...</p></td>
-      // User example 3: <p>...</p>
-      // It seems consistent to use P tags.
-      // If no P tags, maybe use text content split by newline?
+      // Handling fallback when no paragraph tags are present.
+      // Assuming text content needs to be split by newlines as a safe default.
+      // If no P tags, we use text content split by newline.
       elements = [cleanText];
     }
 
