@@ -56,8 +56,20 @@ describe('ScraperService Strict Matching', () => {
     test('should fall back to partial match if no exact match found', async () => {
         nock('https://www.esrb.org')
             .get('/search/')
-            .query(true)
+            .query(obj => obj.searchKeyword === 'VR' && obj.pg == '1')
             .reply(200, mockAmbiguousHTML);
+
+        // Mock Page 2 request (Nothing found)
+        nock('https://www.esrb.org')
+            .get('/search/')
+            .query(obj => obj.searchKeyword === 'VR' && obj.pg == '2')
+            .reply(200, '<html></html>');
+
+        // Mock Page 3 request (Nothing found)
+        nock('https://www.esrb.org')
+            .get('/search/')
+            .query(obj => obj.searchKeyword === 'VR' && obj.pg == '3')
+            .reply(200, '<html></html>');
 
         // "Borderlands 2 VR" is the only thing matching "VR"
         const result = await scraper.getGameData('VR', 'PC');

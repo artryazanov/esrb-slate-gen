@@ -27,7 +27,7 @@ describe('ESRB Generator Tests', () => {
     nock('https://www.esrb.org')
       .get('/search/')
       .query(obj => {
-          return obj.searchKeyword === 'Borderlands 2';
+        return obj.searchKeyword === 'Borderlands 2';
       })
       .reply(200, mockHTML);
 
@@ -51,32 +51,42 @@ describe('ESRB Generator Tests', () => {
   });
 
   test('Scraper should throw if no result', async () => {
-      nock('https://www.esrb.org')
+    nock('https://www.esrb.org')
       .get('/search/')
-      .query(true)
+      .query(obj => obj.pg == '1')
       .reply(200, '<html></html>');
 
-      await expect(scraper.getGameData('Unknown')).rejects.toThrow('not found');
+    nock('https://www.esrb.org')
+      .get('/search/')
+      .query(obj => obj.pg == '2')
+      .reply(200, '<html></html>');
+
+    nock('https://www.esrb.org')
+      .get('/search/')
+      .query(obj => obj.pg == '3')
+      .reply(200, '<html></html>');
+
+    await expect(scraper.getGameData('Unknown')).rejects.toThrow('not found');
   });
 
   test('Renderer should generate image without error', async () => {
-      const data = {
-          title: 'Test Game',
-          ratingCategory: 'M',
-          descriptors: ['Blood', 'Violence'],
-          platforms: 'PC'
-      };
-      const outputPath = path.join(__dirname, 'test_output.png');
+    const data = {
+      title: 'Test Game',
+      ratingCategory: 'M',
+      descriptors: ['Blood', 'Violence'],
+      platforms: 'PC'
+    };
+    const outputPath = path.join(__dirname, 'test_output.png');
 
-      try {
-        await renderer.generate(data, outputPath);
-        expect(fs.existsSync(outputPath)).toBe(true);
-        const stats = fs.statSync(outputPath);
-        expect(stats.size).toBeGreaterThan(0);
-      } finally {
-          if (fs.existsSync(outputPath)) {
-              fs.unlinkSync(outputPath);
-          }
+    try {
+      await renderer.generate(data, outputPath);
+      expect(fs.existsSync(outputPath)).toBe(true);
+      const stats = fs.statSync(outputPath);
+      expect(stats.size).toBeGreaterThan(0);
+    } finally {
+      if (fs.existsSync(outputPath)) {
+        fs.unlinkSync(outputPath);
       }
+    }
   });
 });
