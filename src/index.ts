@@ -15,7 +15,7 @@ program
   .option('-u, --url <url>', 'ESRB game URL')
   .option('-p, --platform <platform>', 'Game platform (optional)')
   .option('-o, --output <path>', 'Output file path', 'output/output.png')
-  .option('-a, --aspect-ratio <ratio>', 'Content aspect ratio (e.g., 16:9)', '16:9')
+  .option('-a, --aspect-ratio <ratio>', 'Content aspect ratio (e.g., 16:9, auto)', 'auto')
   .option('-m, --margin <number>', 'Margin from screen edges (default: 0)', '0')
   .option('--4k', 'Generate in 4K resolution (3840x2160)')
   .action(async (options) => {
@@ -29,32 +29,38 @@ program
       }
 
       // Validate Aspect Ratio
-      const ratioRegex = /^(\d+):(\d+)$/;
-      const match = aspectRatio.match(ratioRegex);
+      let heightFactor = 9 / 16;
 
-      if (!match) {
-        Logger.error('Error: Aspect ratio must be in the format W:H (e.g., 16:9).');
-        process.exit(1);
+      if (aspectRatio === 'auto') {
+        heightFactor = 0; // 0 indicates auto mode
+      } else {
+        const ratioRegex = /^(\d+):(\d+)$/;
+        const match = aspectRatio.match(ratioRegex);
+
+        if (!match) {
+          Logger.error('Error: Aspect ratio must be in the format W:H (e.g., 16:9) or "auto".');
+          process.exit(1);
+        }
+
+        const widthRatio = parseInt(match[1], 10);
+        const heightRatio = parseInt(match[2], 10);
+
+        if (widthRatio <= 0 || heightRatio <= 0) {
+          Logger.error('Error: Aspect ratio values must be positive integers.');
+          process.exit(1);
+        }
+
+        const ratioValue = widthRatio / heightRatio;
+        const minRatio = 16 / 9; // ~1.77
+        const maxRatio = 21 / 9; // ~2.33
+
+        if (ratioValue < minRatio || ratioValue > maxRatio) {
+          Logger.error(`Error: Aspect ratio must be between 16:9 and 21:9. Provided: ${aspectRatio}`);
+          process.exit(1);
+        }
+
+        heightFactor = heightRatio / widthRatio;
       }
-
-      const widthRatio = parseInt(match[1], 10);
-      const heightRatio = parseInt(match[2], 10);
-
-      if (widthRatio <= 0 || heightRatio <= 0) {
-        Logger.error('Error: Aspect ratio values must be positive integers.');
-        process.exit(1);
-      }
-
-      const ratioValue = widthRatio / heightRatio;
-      const minRatio = 16 / 9; // ~1.77
-      const maxRatio = 21 / 9; // ~2.33
-
-      if (ratioValue < minRatio || ratioValue > maxRatio) {
-        Logger.error(`Error: Aspect ratio must be between 16:9 and 21:9. Provided: ${aspectRatio}`);
-        process.exit(1);
-      }
-
-      const heightFactor = heightRatio / widthRatio;
 
       const scraper = new ScraperService();
       const renderer = new RenderService();
