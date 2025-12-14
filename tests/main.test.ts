@@ -72,9 +72,10 @@ describe('ESRB Generator Tests', () => {
   test('Renderer should generate image without error', async () => {
     const data = {
       title: 'Test Game',
-      ratingCategory: 'M',
-      descriptors: ['Blood', 'Violence'],
-      platforms: 'PC'
+      ratingCategory: 'T',
+      descriptors: ['Violence'],
+      interactiveElements: [],
+      platforms: 'All'
     };
     const outputPath = path.join(__dirname, 'test_output.png');
 
@@ -94,6 +95,7 @@ describe('ESRB Generator Tests', () => {
       title: 'Test Game No Desc',
       ratingCategory: 'T', // Use T as we know it exists
       descriptors: ['No Descriptors'],
+      interactiveElements: [],
       platforms: 'PC'
     };
     const outputPath = path.join(__dirname, 'test_output_nodesc.png');

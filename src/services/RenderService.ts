@@ -113,10 +113,36 @@ export class RenderService {
     const frameThickness = 22 * scaleFactor;
     const frameMargin = 10 * scaleFactor;
     const iconPadding = 4 * scaleFactor;
-    const textPadding = 20 * scaleFactor;
+    const textPadding = 32 * scaleFactor;
     const fontSize = 75 * scaleFactor;
-    const lineHeight = 85 * scaleFactor;
-    const rightPadding = 20 * scaleFactor;
+    const count = data.descriptors.length;
+    // Dynamic gap calculation
+    // Base gap is 10 * scaleFactor.
+    // If 2 elements: gap = fontSize (75 * scaleFactor).
+    // As count increases, gap decreases.
+    const defaultGap = 10 * scaleFactor;
+    let gap = defaultGap;
+    if (count > 1) {
+      // Formula: fontSize / (count - 1)
+      // This gives 100% fontSize for N=2, 50% for N=3, etc.
+      // We clamp it so it doesn't go below the default friendly gap.
+      gap = Math.max(defaultGap, fontSize / (count - 1));
+    }
+
+    const currentLineHeight = fontSize + gap;
+
+    // Calculate exact visual height of the text block (no gap after the last line)
+    // Height = (N * fontSize) + ((N-1) * gap)
+    const totalTextHeight = (count * fontSize) + (Math.max(0, count - 1) * gap);
+
+    let textY = startY + (mainBoxHeight - totalTextHeight) / 2;
+
+    // Safety check to ensure it doesn't overlap the top frame
+    const frameInnerTop = startY + frameMargin + frameThickness;
+    if (textY < frameInnerTop + 10) {
+      textY = frameInnerTop + 10;
+    }
+
 
     // 2. Main White Container
     ctx.fillStyle = '#FFFFFF';
@@ -212,6 +238,7 @@ export class RenderService {
     // 5. Descriptors (Right Side)
     // Positioned relative to the icon's visual right edge (which is iconX + iconW)
     const textX = iconX + iconW + textPadding;
+    const rightPadding = 20 * scaleFactor;
 
     // Constraint text width to fit within the frame (right side)
     // Frame inner right edge is: startX + boxWidth - frameMargin - frameThickness
@@ -224,19 +251,11 @@ export class RenderService {
     ctx.textBaseline = 'top';
     ctx.textAlign = 'left';
 
-    // Calculate total height of text block to center it vertically
-    const totalTextHeight = data.descriptors.length * lineHeight;
-    let textY = startY + (mainBoxHeight - totalTextHeight) / 2;
-
-    // Safety check to ensure it doesn't overlap the top frame
-    const frameInnerTop = startY + frameMargin + frameThickness;
-    if (textY < frameInnerTop + 10) {
-      textY = frameInnerTop + 10;
-    }
-
-    data.descriptors.forEach(desc => {
+    data.descriptors.forEach((desc, index) => {
       ctx.fillText(desc, textX, textY, maxTextWidth);
-      textY += lineHeight;
+      // For the next line, move down by fontSize + gap
+      // (which is currentLineHeight)
+      textY += currentLineHeight;
     });
 
     // 7. Interactive Elements Footer
