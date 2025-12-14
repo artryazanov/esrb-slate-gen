@@ -41,7 +41,7 @@ A Node.js-based tool for automatically generating broadcast-compliant ESRB Ratin
     *Note: You may need to install system libraries for `canvas` (e.g., `pkg-config`, `cairo`, `pango`) if the installation fails. See [node-canvas documentation](https://github.com/Automattic/node-canvas).*
 
 2.  **Setup Assets:**
-    Download the standard rating icons:
+    Download the standard rating icons and required font:
     ```bash
     npm run build # This runs the download script automatically
     # OR manual:
@@ -76,7 +76,7 @@ npm test
 *   `src/services/ScraperService`: Handles parsing ESRB.org HTML.
 *   `src/services/RenderService`: Handles drawing the slate using Canvas API.
 *   `assets/icons`: Stores standard rating icons (SVG/PNG).
-*   `assets/fonts`: (Optional) Custom fonts. System fonts are used as fallback.
+*   `assets/fonts`: Stores the custom font (Arimo) used for rendering.
 
 ## License
 
