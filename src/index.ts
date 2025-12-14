@@ -14,7 +14,7 @@ program
   .option('-g, --game <title>', 'Game title')
   .option('-u, --url <url>', 'ESRB game URL')
   .option('-p, --platform <platform>', 'Game platform (optional)')
-  .option('-o, --output <path>', 'Output file path', 'output/output.png')
+  .option('-o, --output <path>', 'Output file path', '/output/output.png')
   .option('-a, --aspect-ratio <ratio>', 'Content aspect ratio (e.g., 16:9, auto)', 'auto')
   .option('-m, --margin <number>', 'Margin from screen edges (default: 0)', '0')
   .option('--4k', 'Generate in 4K resolution (3840x2160)')
