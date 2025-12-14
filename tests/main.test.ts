@@ -89,4 +89,24 @@ describe('ESRB Generator Tests', () => {
       }
     }
   });
+  test('Renderer should generate simple icon for No Descriptors', async () => {
+    const data = {
+      title: 'Test Game No Desc',
+      ratingCategory: 'T', // Use T as we know it exists
+      descriptors: ['No Descriptors'],
+      platforms: 'PC'
+    };
+    const outputPath = path.join(__dirname, 'test_output_nodesc.png');
+
+    try {
+      await renderer.generate(data, outputPath);
+      expect(fs.existsSync(outputPath)).toBe(true);
+      const stats = fs.statSync(outputPath);
+      expect(stats.size).toBeGreaterThan(0);
+    } finally {
+      if (fs.existsSync(outputPath)) {
+        fs.unlinkSync(outputPath);
+      }
+    }
+  });
 });

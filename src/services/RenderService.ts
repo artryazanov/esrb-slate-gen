@@ -30,6 +30,59 @@ export class RenderService {
     ctx.fillStyle = '#1A1818';
     ctx.fillRect(0, 0, canvasWidth, canvasHeight);
 
+    if (data.descriptors.length === 1 && data.descriptors[0] === 'No Descriptors') {
+      let iconPath = path.join(this.ASSETS_DIR, `icons/${data.ratingCategory}.svg`);
+      if (!fs.existsSync(iconPath)) {
+        iconPath = path.join(this.ASSETS_DIR, `icons/${data.ratingCategory}.png`);
+      }
+
+      if (!fs.existsSync(iconPath)) {
+        throw new Error(`Icon file not found for category ${data.ratingCategory}`);
+      }
+
+      let iconImage: any;
+      let iconW = 0;
+      let iconH = canvasHeight;
+
+      if (iconPath.endsWith('.svg')) {
+        const svgContent = fs.readFileSync(iconPath, 'utf-8');
+        const wMatch = svgContent.match(/width="([^"]+)"/);
+        const hMatch = svgContent.match(/height="([^"]+)"/);
+
+        let originalW = 100;
+        let originalH = 100;
+
+        if (wMatch && hMatch) {
+          originalW = parseFloat(wMatch[1]);
+          originalH = parseFloat(hMatch[1]);
+        }
+
+        const ar = originalW / originalH;
+        iconW = iconH * ar;
+
+        // Modify SVG string to force high-resolution rasterization
+        const modifiedSvg = svgContent
+          .replace(/width="([^"]+)"/, `width="${iconW}"`)
+          .replace(/height="([^"]+)"/, `height="${iconH}"`);
+
+        iconImage = await loadImage(Buffer.from(modifiedSvg));
+      } else {
+        iconImage = await loadImage(iconPath);
+        const ar = iconImage.width / iconImage.height;
+        iconW = iconH * ar;
+      }
+
+      const iconX = (canvasWidth - iconW) / 2;
+      const iconY = 0;
+
+      ctx.drawImage(iconImage, iconX, iconY, iconW, iconH);
+
+      const buffer = canvas.toBuffer('image/png');
+      fs.writeFileSync(outputPath, buffer);
+      Logger.info(`Slate saved to ${outputPath}`);
+      return;
+    }
+
     // Layout Constants
     const boxWidth = canvasWidth - (margin * 2);
     // Enforce 16:9 Aspect Ratio
