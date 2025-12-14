@@ -58,7 +58,8 @@ A Node.js-based tool for automatically generating broadcast-compliant ESRB Ratin
 
 | Option | Alias | Description | Required | Default |
 | :--- | :--- | :--- | :--- | :--- |
-| `--game` | `-g` | Game title to search for | Yes | - |
+| `--game` | `-g` | Game title to search for | Yes (or --url) | - |
+| `--url` | `-u` | Direct ESRB URL (e.g., https://www.esrb.org/ratings/...) | Yes (or --game) | - |
 | `--platform` | `-p` | Specific platform (e.g., "Xbox", "PS5") | No | - |
 | `--output` | `-o` | Output file path | No | `output/output.png` |
 | `--margin` | `-m` | Horizontal margin (white box indentation) | No | `0` (Full Screen) |

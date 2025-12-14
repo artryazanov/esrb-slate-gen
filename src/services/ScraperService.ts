@@ -83,6 +83,68 @@ export class ScraperService {
     }
   }
 
+  public async getGameDataFromUrl(url: string): Promise<ESRBData> {
+    try {
+      // Validate URL mask: https://www.esrb.org/ratings/{int}/*
+      const urlRegex = /^https:\/\/www\.esrb\.org\/ratings\/\d+\/.+$/;
+      if (!urlRegex.test(url)) {
+        throw new Error('Invalid URL format. Expected: https://www.esrb.org/ratings/{id}/{slug}');
+      }
+
+      Logger.info(`Fetching data from: ${url}`);
+
+      const { data } = await axios.get(url, {
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+          'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
+          'Accept-Language': 'en-US,en;q=0.9',
+          'Referer': 'https://www.esrb.org/',
+          'Connection': 'keep-alive'
+        }
+      });
+
+      const $ = cheerio.load(data);
+
+      const title = $('.synopsis-header h1').text().trim();
+      if (!title) {
+        throw new Error('Could not extract game title from page.');
+      }
+
+      const platforms = $('.platforms-txt').text().trim();
+      const ratingImgSrc = $('.info-img img').attr('src') || '';
+      const ratingCategory = this.extractRatingFromUrl(ratingImgSrc);
+
+      const descriptorsText = $('.description').text().trim();
+      const descriptors = descriptorsText
+        .split(/,\s*/)
+        .map(d => d.trim())
+        .filter(d => d.length > 0);
+
+      const interactiveElements: string[] = [];
+      $('.other-info ul li').each((i, el) => {
+        const text = $(el).text().trim();
+        if (text) interactiveElements.push(text);
+      });
+
+      const cleanInteractiveElements = interactiveElements
+        .map(e => e.replace(/\s*\([^)]*\)/g, '').trim()) // Remove (...)
+        .filter(e => e.length > 0);
+
+      Logger.info(`Found: ${title} [${ratingCategory}]`);
+
+      return {
+        title,
+        ratingCategory,
+        descriptors,
+        platforms,
+        interactiveElements: cleanInteractiveElements
+      };
+    } catch (error) {
+      Logger.error(`Direct URL scraping failed: ${(error as Error).message}`);
+      throw error;
+    }
+  }
+
   private async fetchCandidates(query: string, platform: string | undefined, page: number) {
     const searchUrl = `${this.baseUrl}?searchKeyword=${encodeURIComponent(query)}&platform=${platform ? encodeURIComponent(platform) : 'All%20Platforms'}&pg=${page}`;
 
