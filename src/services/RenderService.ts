@@ -11,9 +11,9 @@ export class RenderService {
 
   constructor() {
     // Try to register custom font if exists, otherwise rely on system font
-    const fontPath = path.join(this.ASSETS_DIR, 'fonts/Arial-Bold.ttf');
+    const fontPath = path.join(this.ASSETS_DIR, 'fonts/Oswald-Bold.ttf');
     if (fs.existsSync(fontPath)) {
-      registerFont(fontPath, { family: 'SlateFont' });
+      registerFont(fontPath, { family: 'Oswald' });
     } else {
       Logger.info('Custom font not found. Using system sans-serif.');
     }
@@ -149,7 +149,7 @@ export class RenderService {
     const maxTextWidth = frameInnerRight - textX - rightPadding;
 
     ctx.fillStyle = '#1A1818';
-    ctx.font = `bold ${fontSize}px "SlateFont", Arial, sans-serif`;
+    ctx.font = `bold ${fontSize}px "Oswald", Arial, sans-serif`;
     ctx.textBaseline = 'top';
     ctx.textAlign = 'left';
 
