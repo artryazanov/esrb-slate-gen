@@ -133,29 +133,37 @@ export class RenderService {
     // Height - 2*thickness - 2*padding
     const availableTextHeight = frameH - (frameThickness * 2) - (20 * scaleFactor);
 
-    let fontSize = 75 * scaleFactor;
+    let fontSize = 82 * scaleFactor;
     const count = data.descriptors.length;
     let gap = 0;
 
-    // Iteratively reduce font size until text fits
-    // Limit iterations to prevent infinite loops (though highly unlikely)
+    // Iteratively reduce font size until text fits with a minimum baseline gap
+    // Limit iterations to prevent infinite loops
     for (let i = 0; i < 20; i++) {
-      // Dynamic gap calculation
-      // User wants gap to decrease faster as count increases.
-      // Base gap floor.
-      const minGap = 2 * scaleFactor;
+      // Baseline gap (minimum comfortable spacing)
+      const minGap = 0.25 * fontSize;
 
-      if (count > 1) {
-        // More aggressive reduction: divide by count * 1.5 instead of count - 1
-        // This makes the gap significantly smaller for 7 lines.
-        gap = Math.max(minGap, fontSize / (count * 1.5));
-      } else {
-        gap = 10 * scaleFactor;
-      }
+      const totalMinHeight = (count * fontSize) + (Math.max(0, count - 1) * minGap);
 
-      const totalTextHeight = (count * fontSize) + (Math.max(0, count - 1) * gap);
+      if (totalMinHeight <= availableTextHeight) {
+        // Text fits! Now let's distribute the extra space to the gaps
+        const remainingSpace = availableTextHeight - totalMinHeight;
 
-      if (totalTextHeight <= availableTextHeight) {
+        if (count > 1) {
+          // Distribute some of the removing space to the gaps.
+          // We don't use 100% of space to avoid text touching the edges too much.
+          // Splitting space between (count-1) gaps and 2 outer margins (top/bottom) roughly.
+          // divisor = (count - 1) + 2 => count + 1.
+          const extraPerItem = remainingSpace / (count + 2);
+          gap = minGap + extraPerItem;
+
+          // Cap the gap to prevent it from looking disconnected
+          // e.g. Max gap = 60% of font size
+          gap = Math.min(gap, 0.6 * fontSize);
+        } else {
+          // For single line, gap doesn't matter for height, but let's keep it sane
+          gap = minGap;
+        }
         break;
       }
 
