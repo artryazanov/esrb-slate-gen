@@ -1,10 +1,12 @@
 import nock from 'nock';
 import { ScraperService } from '../src/services/ScraperService';
 
+import { Logger } from '../src/utils/logger';
+
 describe('ScraperService URL Scraping', () => {
-    let scraper: ScraperService;
-    const validUrl = 'https://www.esrb.org/ratings/40649/borderlands-4/';
-    const mockHtml = `
+  let scraper: ScraperService;
+  const validUrl = 'https://www.esrb.org/ratings/40649/borderlands-4/';
+  const mockHtml = `
     <!DOCTYPE html>
     <html>
       <head></head>
@@ -32,46 +34,53 @@ describe('ScraperService URL Scraping', () => {
     </html>
   `;
 
-    beforeAll(() => {
-        scraper = new ScraperService();
-    });
+  beforeAll(() => {
+    scraper = new ScraperService();
+    // Mock Logger to prevent noise in tests
+    jest.spyOn(Logger, 'error').mockImplementation(() => ({}) as any);
+    jest.spyOn(Logger, 'info').mockImplementation(() => ({}) as any);
+  });
 
-    afterEach(() => {
-        nock.cleanAll();
-    });
+  afterAll(() => {
+    jest.restoreAllMocks();
+  });
 
-    test('should scrape game data correctly from valid URL', async () => {
-        nock('https://www.esrb.org')
-            .get('/ratings/40649/borderlands-4/')
-            .reply(200, mockHtml);
+  afterEach(() => {
+    nock.cleanAll();
+  });
 
-        const data = await scraper.getGameDataFromUrl(validUrl);
+  test('should scrape game data correctly from valid URL', async () => {
+    nock('https://www.esrb.org')
+      .get('/ratings/40649/borderlands-4/')
+      .reply(200, mockHtml);
 
-        expect(data.title).toBe('Borderlands 4');
-        expect(data.ratingCategory).toBe('M');
-        expect(data.descriptors).toEqual(['Blood and Gore', 'Intense Violence', 'Sexual Themes', 'Strong Language']);
-        expect(data.interactiveElements).toEqual(['Users Interact', 'In-Game Purchases']);
-        expect(data.platforms).toContain('Windows PC');
-    });
+    const data = await scraper.getGameDataFromUrl(validUrl);
 
-    test('should throw error for invalid URL format', async () => {
-        const invalidUrl = 'https://www.google.com';
-        await expect(scraper.getGameDataFromUrl(invalidUrl)).rejects.toThrow('Invalid URL format');
-    });
+    expect(data.title).toBe('Borderlands 4');
+    expect(data.ratingCategory).toBe('M');
+    expect(data.descriptors).toEqual(['Blood and Gore', 'Intense Violence', 'Sexual Themes', 'Strong Language']);
+    expect(data.interactiveElements).toEqual(['Users Interact', 'In-Game Purchases']);
+    expect(data.platforms).toContain('Windows PC');
+  });
 
-    test('should throw error if title is not found', async () => {
-        nock('https://www.esrb.org')
-            .get('/ratings/40649/borderlands-4/')
-            .reply(200, '<html><body></body></html>');
+  test('should throw error for invalid URL format', async () => {
+    const invalidUrl = 'https://www.google.com';
+    await expect(scraper.getGameDataFromUrl(invalidUrl)).rejects.toThrow('Invalid URL format');
+  });
 
-        await expect(scraper.getGameDataFromUrl(validUrl)).rejects.toThrow('Could not extract game title');
-    });
+  test('should throw error if title is not found', async () => {
+    nock('https://www.esrb.org')
+      .get('/ratings/40649/borderlands-4/')
+      .reply(200, '<html><body></body></html>');
 
-    test('should throw error on network failure', async () => {
-        nock('https://www.esrb.org')
-            .get('/ratings/40649/borderlands-4/')
-            .replyWithError('Network Error');
+    await expect(scraper.getGameDataFromUrl(validUrl)).rejects.toThrow('Could not extract game title');
+  });
 
-        await expect(scraper.getGameDataFromUrl(validUrl)).rejects.toThrow('Network Error');
-    });
+  test('should throw error on network failure', async () => {
+    nock('https://www.esrb.org')
+      .get('/ratings/40649/borderlands-4/')
+      .replyWithError('Network Error');
+
+    await expect(scraper.getGameDataFromUrl(validUrl)).rejects.toThrow('Network Error');
+  });
 });

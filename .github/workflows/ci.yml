@@ -30,5 +30,8 @@ jobs:
     - name: Build
       run: npm run build
 
+    - name: Download assets
+      run: npm run download-assets
+
     - name: Run tests
       run: npm test

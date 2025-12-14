@@ -7,7 +7,8 @@
     "build": "tsc",
     "start": "node dist/index.js",
     "test": "jest",
-    "dev": "ts-node src/index.ts"
+    "dev": "ts-node src/index.ts",
+    "download-assets": "ts-node scripts/download_assets.ts"
   },
   "keywords": [
     "esrb",
