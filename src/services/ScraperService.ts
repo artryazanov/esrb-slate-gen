@@ -139,8 +139,75 @@ export class ScraperService {
       title,
       ratingCategory,
       descriptors: cleanDescriptors,
-      platforms: gameElement.find('.platforms').text().trim()
+      platforms: gameElement.find('.platforms').text().trim(),
+      interactiveElements: this.extractInteractiveElements(gameElement)
     };
+  }
+
+  private extractInteractiveElements(gameElement: cheerio.Cheerio<any>): string[] {
+    const cells = gameElement.find('.content td');
+    let interactiveCell: cheerio.Cheerio<any> | null = null;
+
+    for (let i = 0; i < cells.length; i++) {
+      const cell = cells.eq(i);
+      const text = cell.text();
+      // Heuristic: check for the label or specific known values if the label is missing
+      // The label is usually "Interactive Elements:" inside the cell text
+      if (text.includes('Interactive Elements')) {
+        interactiveCell = cell;
+        break;
+      }
+    }
+
+    // If not found by label, maybe it's the 3rd cell (index 2) if 3 columns exist
+    if (!interactiveCell && cells.length >= 3) {
+      interactiveCell = cells.eq(2);
+    }
+
+    if (!interactiveCell) {
+      return [];
+    }
+
+    // Extract text and process
+    // We want to process HTML to handle <br> or <p> if necessary, 
+    // but .text() usually works if we just want the content.
+    // However, the user wants to remove content in brackets (..).
+
+    // Let's get the raw text first, but we need to handle "No Interactive Elements"
+    const fullText = interactiveCell.text().trim();
+    if (fullText.includes('No Interactive Elements')) {
+      return [];
+    }
+
+    // Clean text: remove "Interactive Elements:" label
+    let cleanText = fullText.replace(/^Interactive Elements:\s*/i, '');
+
+    // The content might be formatted with <p> tags according to user.
+    // If we use .text(), "Users Interact (PC)In-Game Purchases (PC)" might be concatenated.
+    // Better to iterate over child elements if they exist.
+    const children = interactiveCell.children('p');
+    let elements: string[] = [];
+
+    if (children.length > 0) {
+      for (let i = 0; i < children.length; i++) {
+        elements.push(children.eq(i).text());
+      }
+    } else {
+      // Fallback: just split by some delimiters or take the whole text if it's one block
+      // Sometimes it's comma separated or just newlines?
+      // Let's assume text content needs to be split if not in P tags.
+      // User example 1: <p>...</p>
+      // User example 2: <td><p>...</p><p>...</p></td>
+      // User example 3: <p>...</p>
+      // It seems consistent to use P tags.
+      // If no P tags, maybe use text content split by newline?
+      elements = [cleanText];
+    }
+
+    // Clean up elements
+    return elements
+      .map(e => e.replace(/\s*\([^)]*\)/g, '').trim()) // Remove (...)
+      .filter(e => e.length > 0 && e !== 'Interactive Elements:'); // Filter empty
   }
 
   private extractRatingFromUrl(url: string): string {

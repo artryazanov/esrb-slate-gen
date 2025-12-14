@@ -85,17 +85,29 @@ export class RenderService {
 
     // Layout Constants
     const boxWidth = canvasWidth - (margin * 2);
-    // Enforce 16:9 Aspect Ratio
-    const boxHeight = boxWidth * (9 / 16);
+    // Enforce 16:9 Aspect Ratio for the TOTAL drawing area
+    const totalBoxHeight = boxWidth * (9 / 16);
 
-    const boxX = margin;
+    const startX = margin;
     // Center vertically
-    const boxY = (canvasHeight - boxHeight) / 2;
+    const startY = (canvasHeight - totalBoxHeight) / 2;
+
+    const hasInteractive = data.interactiveElements && data.interactiveElements.length > 0;
+
+    // Determine heights
+    let mainBoxHeight = totalBoxHeight;
+    let interactiveBoxHeight = 0;
+
+    if (hasInteractive) {
+      // Allocate ~19.5% for interactive elements (30% increase from 15%)
+      interactiveBoxHeight = totalBoxHeight * 0.195;
+      mainBoxHeight = totalBoxHeight - interactiveBoxHeight;
+    }
 
     // Use 650 as the "reference height" for scaling elements
     // Previous fixed height was 650.
     const referenceHeight = 650;
-    const scaleFactor = boxHeight / referenceHeight;
+    const scaleFactor = mainBoxHeight / referenceHeight;
 
     // Scaled design constants
     const frameThickness = 22 * scaleFactor;
@@ -108,7 +120,7 @@ export class RenderService {
 
     // 2. Main White Container
     ctx.fillStyle = '#FFFFFF';
-    ctx.fillRect(boxX, boxY, boxWidth, boxHeight);
+    ctx.fillRect(startX, startY, boxWidth, mainBoxHeight);
 
     // 3. Load & Draw Icon (Left Side)
     // We prioritize the SVG and scale it up to prevent blurriness
@@ -124,7 +136,7 @@ export class RenderService {
 
     // Determine target dimensions for the icon
     // It should fill the box height minus the small padding
-    const maxIconHeight = boxHeight - (iconPadding * 2);
+    const maxIconHeight = mainBoxHeight - (iconPadding * 2);
 
     let iconImage: any;
     let iconW = 0;
@@ -166,18 +178,24 @@ export class RenderService {
       iconW = iconH * ar;
     }
 
-    const iconX = boxX + iconPadding;
-    const iconY = boxY + iconPadding;
+    const iconX = startX + iconPadding;
+    const iconY = startY + iconPadding;
 
     // Draw Icon BEFORE the frame
     ctx.drawImage(iconImage, iconX, iconY, iconW, iconH);
 
     // 4. Draw Black Frame
     // Thickness and margin scaled logic
-    const frameX = boxX + frameMargin;
-    const frameY = boxY + frameMargin;
+    const frameX = startX + frameMargin;
+    const frameY = startY + frameMargin;
     const frameW = boxWidth - (frameMargin * 2);
-    const frameH = boxHeight - (frameMargin * 2);
+    // Frame height strictly follows the white box, 
+    // BUT if we have interactive section, we need to handle the bottom border carefully.
+    // The main frame should enclose the main white box.
+    // If hasInteractive, we want it to touch the bottom (no bottom margin)
+    const frameH = hasInteractive
+      ? mainBoxHeight - frameMargin
+      : mainBoxHeight - (frameMargin * 2);
 
     ctx.beginPath();
     const halfStroke = frameThickness / 2;
@@ -196,8 +214,8 @@ export class RenderService {
     const textX = iconX + iconW + textPadding;
 
     // Constraint text width to fit within the frame (right side)
-    // Frame inner right edge is: boxX + boxWidth - frameMargin - frameThickness
-    const frameInnerRight = boxX + boxWidth - frameMargin - frameThickness;
+    // Frame inner right edge is: startX + boxWidth - frameMargin - frameThickness
+    const frameInnerRight = startX + boxWidth - frameMargin - frameThickness;
 
     const maxTextWidth = frameInnerRight - textX - rightPadding;
 
@@ -208,10 +226,10 @@ export class RenderService {
 
     // Calculate total height of text block to center it vertically
     const totalTextHeight = data.descriptors.length * lineHeight;
-    let textY = boxY + (boxHeight - totalTextHeight) / 2;
+    let textY = startY + (mainBoxHeight - totalTextHeight) / 2;
 
     // Safety check to ensure it doesn't overlap the top frame
-    const frameInnerTop = boxY + frameMargin + frameThickness;
+    const frameInnerTop = startY + frameMargin + frameThickness;
     if (textY < frameInnerTop + 10) {
       textY = frameInnerTop + 10;
     }
@@ -220,6 +238,64 @@ export class RenderService {
       ctx.fillText(desc, textX, textY, maxTextWidth);
       textY += lineHeight;
     });
+
+    // 7. Interactive Elements Footer
+    if (hasInteractive) {
+      const interactY = startY + mainBoxHeight; // Starts exactly where main box ends
+
+      // Draw White Background
+      ctx.fillStyle = '#FFFFFF';
+      ctx.fillRect(startX, interactY, boxWidth, interactiveBoxHeight);
+
+      // Draw Black Frame for Footer
+      // Should match the main frame style
+      // The main frame used: frameX, frameY, frameW, frameH
+      // Here: x is same. y is shifted. width same. height adapted.
+      // Note: frameMargin creates a gap between Edge (startX) and Frame (frameX).
+      // We want the footer frame to align with main frame.
+
+      // Update logic: "Lower frame should be stretched in height and must touch the upper frame"
+      // So we remove the top margin (gap) from the footer.
+      // Upper frame ends at: startY + mainBoxHeight - 0 margin (visually)
+      // Footer frame starts at: interactY (which is startY + mainBoxHeight).
+
+      const footerFrameY = interactY - frameThickness; // Touch the line above
+      // Footer height: interactiveBoxHeight - frameMargin (bottom margin only) + overlap
+      const footerFrameH = interactiveBoxHeight - frameMargin + frameThickness;
+
+      ctx.beginPath();
+      // Calculate thinner stroke
+      const footerThickness = frameThickness / 2;
+      const footerHalfStroke = footerThickness / 2;
+
+      ctx.rect(
+        frameX + footerHalfStroke,
+        footerFrameY + footerHalfStroke,
+        frameW - footerThickness,
+        footerFrameH - footerThickness
+      );
+      ctx.lineWidth = footerThickness;
+      ctx.strokeStyle = '#1A1818';
+      ctx.stroke();
+
+      // Draw Text
+      // Centered?
+      const interactText = data.interactiveElements.slice(0, 3).join(', '); // Limit to 3 lines/items?
+      // User examples: "Users Interact", "In-Game Purchases".
+      // Font size? slightly smaller to ensure fit?
+      // Or same size.
+      const footerFontSize = fontSize * 1.04; // Increased by 30% from 0.8
+      ctx.font = `bold ${footerFontSize}px "Arimo", Arial, sans-serif`;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillStyle = '#1A1818';
+
+      const footerTextX = startX + (boxWidth / 2);
+      // Center in the frame (which is footerFrameH tall), not the whole box
+      const footerTextY = footerFrameY + (footerFrameH / 2);
+
+      ctx.fillText(interactText, footerTextX, footerTextY, frameW - textPadding);
+    }
 
     // 6. Save
     const buffer = canvas.toBuffer('image/png');
