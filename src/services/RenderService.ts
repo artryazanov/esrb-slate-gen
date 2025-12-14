@@ -115,23 +115,52 @@ export class RenderService {
     const scaleFactor = mainBoxHeight / referenceHeight;
 
     // Scaled design constants
+
     const frameThickness = 22 * scaleFactor;
     const frameMargin = 10 * scaleFactor;
     const iconPadding = 4 * scaleFactor;
     const textPadding = 32 * scaleFactor;
-    const fontSize = 75 * scaleFactor;
+
+    // Calculate available height for text
+    // Frame Y start: startY + frameMargin
+    // Frame Height: frameH (calculated below, but we need it here or need to move this logic)
+    // Let's pre-calc frameH logic here for text sizing
+    const frameH = hasInteractive
+      ? mainBoxHeight - frameMargin
+      : mainBoxHeight - (frameMargin * 2);
+
+    // Available vertical space inside the frame
+    // Height - 2*thickness - 2*padding
+    const availableTextHeight = frameH - (frameThickness * 2) - (20 * scaleFactor);
+
+    let fontSize = 75 * scaleFactor;
     const count = data.descriptors.length;
-    // Dynamic gap calculation
-    // Base gap is 10 * scaleFactor.
-    // If 2 elements: gap = fontSize (75 * scaleFactor).
-    // As count increases, gap decreases.
-    const defaultGap = 10 * scaleFactor;
-    let gap = defaultGap;
-    if (count > 1) {
-      // Formula: fontSize / (count - 1)
-      // This gives 100% fontSize for N=2, 50% for N=3, etc.
-      // We clamp it so it doesn't go below the default friendly gap.
-      gap = Math.max(defaultGap, fontSize / (count - 1));
+    let gap = 0;
+
+    // Iteratively reduce font size until text fits
+    // Limit iterations to prevent infinite loops (though highly unlikely)
+    for (let i = 0; i < 20; i++) {
+      // Dynamic gap calculation
+      // User wants gap to decrease faster as count increases.
+      // Base gap floor.
+      const minGap = 2 * scaleFactor;
+
+      if (count > 1) {
+        // More aggressive reduction: divide by count * 1.5 instead of count - 1
+        // This makes the gap significantly smaller for 7 lines.
+        gap = Math.max(minGap, fontSize / (count * 1.5));
+      } else {
+        gap = 10 * scaleFactor;
+      }
+
+      const totalTextHeight = (count * fontSize) + (Math.max(0, count - 1) * gap);
+
+      if (totalTextHeight <= availableTextHeight) {
+        break;
+      }
+
+      // If it doesn't fit, reduce font size by 5%
+      fontSize *= 0.95;
     }
 
     const currentLineHeight = fontSize + gap;
@@ -224,9 +253,7 @@ export class RenderService {
     // BUT if we have interactive section, we need to handle the bottom border carefully.
     // The main frame should enclose the main white box.
     // If hasInteractive, we want it to touch the bottom (no bottom margin)
-    const frameH = hasInteractive
-      ? mainBoxHeight - frameMargin
-      : mainBoxHeight - (frameMargin * 2);
+
 
     ctx.beginPath();
     const halfStroke = frameThickness / 2;
