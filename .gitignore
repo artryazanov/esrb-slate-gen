@@ -1,6 +1,7 @@
-node_modules
-dist
+assets
 coverage
+dist
+node_modules
+output
 *.log
 .DS_Store
-output/
