@@ -63,6 +63,7 @@ A Node.js-based tool for automatically generating broadcast-compliant ESRB Ratin
 | `--platform` | `-p` | Specific platform (e.g., "Xbox", "PS5") | No | - |
 | `--output` | `-o` | Output file path | No | `output/output.png` |
 | `--margin` | `-m` | Horizontal margin (white box indentation) | No | `0` (Full Screen) |
+| `--aspect-ratio` | `-a` | Content box aspect ratio. Range: 16:9 to 21:9. | No | `16:9` |
 | `--4k` | | Generate in 4K resolution (3840x2160) | No | `false` |
 
 ## Testing

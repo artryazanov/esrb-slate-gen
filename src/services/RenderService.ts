@@ -19,7 +19,7 @@ export class RenderService {
     }
   }
 
-  public async generate(data: ESRBData, outputPath: string, margin: number = 0, is4k: boolean = false): Promise<void> {
+  public async generate(data: ESRBData, outputPath: string, margin: number = 0, is4k: boolean = false, heightFactor: number = 9 / 16): Promise<void> {
     const canvasWidth = is4k ? 3840 : 1920;
     const canvasHeight = is4k ? 2160 : 1080;
 
@@ -85,8 +85,8 @@ export class RenderService {
 
     // Layout Constants
     const boxWidth = canvasWidth - (margin * 2);
-    // Enforce 16:9 Aspect Ratio for the TOTAL drawing area
-    const totalBoxHeight = boxWidth * (9 / 16);
+    // Aspect Ratio determines the TOTAL drawing area height
+    const totalBoxHeight = boxWidth * heightFactor;
 
     const startX = margin;
     // Center vertically
@@ -179,7 +179,6 @@ export class RenderService {
 
     let textY = startY + (mainBoxHeight - totalTextHeight) / 2;
 
-    // Safety check to ensure it doesn't overlap the top frame
     const frameInnerTop = startY + frameMargin + frameThickness;
     if (textY < frameInnerTop + 10) {
       textY = frameInnerTop + 10;
