@@ -3,7 +3,6 @@
 A Node.js-based tool for automatically generating broadcast-compliant ESRB Rating Slates. This application scrapes the official [ESRB website](https://www.esrb.org) for game data and renders a high-resolution PNG image suitable for video trailers.
 
 [![CI](https://github.com/artryazanov/esrb-slate-gen/actions/workflows/ci.yml/badge.svg)](https://github.com/artryazanov/esrb-slate-gen/actions/workflows/ci.yml)
-![Version](https://img.shields.io/badge/version-1.0.0-blue)
 [![License: Unlicense](https://img.shields.io/badge/license-Unlicense-blue.svg)](LICENSE)
 ![TypeScript](https://img.shields.io/badge/typescript-%23007ACC.svg?style=flat&logo=typescript&logoColor=white)
 ![Node.js](https://img.shields.io/badge/node.js-6DA55F?style=flat&logo=node.js&logoColor=white)
