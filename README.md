@@ -4,7 +4,7 @@ A Node.js-based tool for generating broadcast-compliant ESRB Rating Slates. This
 
 It can be used as a **Command Line Interface (CLI)** or imported as a **TypeScript/Node.js Library**.
 
-<img src="esrb-slate-example.png" alt="ESRB Slate Example" width="640" />
+<img src="https://raw.githubusercontent.com/artryazanov/esrb-slate-gen/main/esrb-slate-example.png" alt="ESRB Slate Example" width="640" />
 
 _Example generation for [Borderlands 4](https://www.esrb.org/ratings/40649/borderlands-4/)_
 
