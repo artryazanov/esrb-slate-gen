@@ -479,7 +479,15 @@ export class RenderService {
     }
 
     // 6. Save
-    const buffer = canvas.toBuffer('image/png');
+    const ext = path.extname(outputPath).toLowerCase();
+    let buffer: Buffer;
+
+    if (ext === '.jpg' || ext === '.jpeg') {
+      buffer = canvas.toBuffer('image/jpeg');
+    } else {
+      buffer = canvas.toBuffer('image/png');
+    }
+
     fs.writeFileSync(outputPath, buffer);
     Logger.info(`Slate saved to ${outputPath}`);
   }

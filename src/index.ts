@@ -84,7 +84,17 @@ program
         fs.mkdirSync(outputDir, { recursive: true });
       }
 
-      await renderer.generate(data, outputPath, parseInt(margin, 10), is4k, heightFactor);
+      // Check for file extension and append .png if missing or not supported
+      const ext = path.extname(outputPath).toLowerCase();
+      const supportedExtensions = ['.png', '.jpg', '.jpeg'];
+      let finalOutputPath = outputPath;
+
+      if (!supportedExtensions.includes(ext)) {
+        finalOutputPath += '.png';
+        Logger.info(`Output file extension not supported or missing. Appending .png to filename: ${path.basename(finalOutputPath)}`);
+      }
+
+      await renderer.generate(data, finalOutputPath, parseInt(margin, 10), is4k, heightFactor);
 
       Logger.info('Done.');
     } catch (error) {
