@@ -1,6 +1,8 @@
 # ESRB Rating Slate Generator
 
-A Node.js-based tool for generating broadcast-compliant ESRB Rating Slates. This application can scrape the official [ESRB website](https://www.esrb.org) for game data or generate slates from manual input, rendering high-resolution PNG images suitable for video trailers.
+A Node.js-based tool for generating broadcast-compliant ESRB Rating Slates. This application can **scrape** the official [ESRB website](https://www.esrb.org) for game data or generate slates from **manual input**, rendering high-resolution PNG images suitable for video trailers.
+
+It can be used as a **Command Line Interface (CLI)** or imported as a **TypeScript/Node.js Library**.
 
 <img src="esrb-slate-example.png" alt="ESRB Slate Example" width="640" />
 
@@ -15,6 +17,7 @@ _Example generation for [Borderlands 4](https://www.esrb.org/ratings/40649/borde
 
 ## Features
 
+*   **Dual Mode:** Works as a CLI tool and an importable Library.
 *   **Automated Scraping:** Fetches rating category and content descriptors directly from ESRB.org.
 *   **Manual Mode:** Generate slates by manually specifying rating, descriptors, and interactive elements.
 *   **Platform Filtering:** Optional filtering to target specific game versions (e.g., PS5 vs Xbox).
@@ -24,12 +27,15 @@ _Example generation for [Borderlands 4](https://www.esrb.org/ratings/40649/borde
 
 ## Prerequisites
 
-*   **Docker** (Recommended)
-*   *OR* **Node.js v18+** with system dependencies for `node-canvas` (libcairo, libpango) installed.
+*   **Docker** (Recommended for CLI)
+*   *OR* **Node.js v18+** with system dependencies for `node-canvas` (libcairo, libpango) installed (for Library/Local usage).
 
-## Usage
+---
 
-### Using Docker (Recommended)
+## 1. CLI Usage
+
+### Using Docker
+
 1.  **Build the image:**
     ```bash
     docker build -t esrb-gen .
@@ -44,32 +50,72 @@ _Example generation for [Borderlands 4](https://www.esrb.org/ratings/40649/borde
       --output "/output/my-slate.png"
     ```
 
-### Local Development
+### Using NPM / NPX
 
-1.  **Install dependencies:**
-    ```bash
-    npm install
-    ```
-    *Note: You may need to install system libraries for `canvas` (e.g., `pkg-config`, `cairo`, `pango`) if the installation fails. See [node-canvas documentation](https://github.com/Automattic/node-canvas).*
+You can run the CLI directly without Docker if you have Node.js installed.
 
-2.  **Setup Assets:**
-    Download the standard rating icons and required font:
-    ```bash
-    npm run build # This runs the download script automatically
-    # OR manual:
-    npx ts-node scripts/download_assets.ts
-    ```
+```bash
+# Run directly with npx
+npx esrb-slate-gen --game "God of War"
 
-3.  **Run the CLI:**
-    ```bash
-    npx ts-node src/index.ts -g "Borderlands 2"
-    ```
-    *This will save the image to `output/output.png` by default.*
+# Or install globally
+npm install -g esrb-slate-gen
+esrb-gen --url "https://www.esrb.org/ratings/39039/god-of-war-ragnarok/"
+```
 
-    **Manual Generation (No Scraping):**
-    ```bash
-    npx ts-node src/index.ts -r "M" -d "Blood, Violence" -i "In-Game Purchases"
-    ```
+**Manual Generation Example:**
+```bash
+npx esrb-slate-gen -r "M" -d "Blood, Violence" -i "In-Game Purchases"
+```
+
+## 2. Library Usage
+
+You can use `esrb-slate-gen` typically as a dependency in your own Node.js project.
+
+### Installation
+
+```bash
+npm install esrb-slate-gen
+```
+
+### Example Code
+
+```typescript
+import { ScraperService, RenderService, ESRBData } from 'esrb-slate-gen';
+import path from 'path';
+
+async function generateSlate() {
+  // 1. Get Data (scrape or create manually)
+  const scraper = new ScraperService();
+  const data = await scraper.getGameData('Hades', 'PC');
+  
+  // OR Manual Data:
+  /*
+  const data: ESRBData = {
+    title: 'My Game',
+    ratingCategory: 'T',
+    descriptors: ['Fantasy Violence'],
+    interactiveElements: []
+  };
+  */
+
+  // 2. Render Image
+  // You can optionally pass specific assets directory if needed
+  const renderer = new RenderService(); 
+  
+  await renderer.generate(
+    data, 
+    path.join(__dirname, 'output.png'),
+    0,     // margin (0 = variable width/fullscreen)
+    false, // is4k
+    9/16   // heightFactor (or pass 0 for auto-calculation)
+  );
+}
+
+generateSlate();
+```
+
+---
 
 ## CLI Options
 
@@ -92,13 +138,6 @@ Run the test suite using Jest:
 ```bash
 npm test
 ```
-
-## Project Structure
-
-*   `src/services/ScraperService`: Handles parsing ESRB.org HTML.
-*   `src/services/RenderService`: Handles drawing the slate using Canvas API.
-*   `assets/icons`: Stores standard rating icons (SVG/PNG).
-*   `assets/fonts`: Stores the custom font (Arimo) used for rendering.
 
 ## License
 

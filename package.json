@@ -2,7 +2,15 @@
   "name": "esrb-slate-gen",
   "version": "1.0.0",
   "description": "CLI tool to generate ESRB rating slates",
-  "main": "dist/index.js",
+  "main": "dist/lib.js",
+  "types": "dist/lib.d.ts",
+  "bin": {
+    "esrb-gen": "dist/index.js"
+  },
+  "files": [
+    "dist",
+    "assets"
+  ],
   "scripts": {
     "build": "tsc",
     "start": "node dist/index.js",

@@ -7,9 +7,13 @@ import { Logger } from '../utils/logger';
 export class RenderService {
   private readonly WIDTH = 1920;
   private readonly HEIGHT = 1080;
-  private readonly ASSETS_DIR = path.join(__dirname, '../../assets');
+  private ASSETS_DIR = path.join(__dirname, '../../assets');
 
-  constructor() {
+  constructor(options?: { assetsDir?: string }) {
+    if (options?.assetsDir) {
+      this.ASSETS_DIR = options.assetsDir;
+    }
+
     // Try to register custom font if exists, otherwise rely on system font
     const fontPath = path.join(this.ASSETS_DIR, 'fonts/Arimo-Variable.ttf');
     if (fs.existsSync(fontPath)) {
