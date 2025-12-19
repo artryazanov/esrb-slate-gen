@@ -10,6 +10,7 @@ _Example generation for [Borderlands 4](https://www.esrb.org/ratings/40649/borde
 
 [![CI](https://github.com/artryazanov/esrb-slate-gen/actions/workflows/ci.yml/badge.svg)](https://github.com/artryazanov/esrb-slate-gen/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![npm version](https://img.shields.io/npm/v/esrb-slate-gen.svg)](https://www.npmjs.com/package/esrb-slate-gen)
 ![TypeScript](https://img.shields.io/badge/typescript-%23007ACC.svg?style=flat&logo=typescript&logoColor=white)
 ![Node.js](https://img.shields.io/badge/node.js-6DA55F?style=flat&logo=node.js&logoColor=white)
 ![Jest](https://img.shields.io/badge/-jest-%23C21325?style=flat&logo=jest&logoColor=white)
