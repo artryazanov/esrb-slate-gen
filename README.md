@@ -1,6 +1,6 @@
 # ESRB Rating Slate Generator
 
-A Node.js-based tool for automatically generating broadcast-compliant ESRB Rating Slates. This application can scrape the official [ESRB website](https://www.esrb.org) for game data or generate slates from manual input, rendering high-resolution PNG images suitable for video trailers.
+A Node.js-based tool for generating broadcast-compliant ESRB Rating Slates. This application can scrape the official [ESRB website](https://www.esrb.org) for game data or generate slates from manual input, rendering high-resolution PNG images suitable for video trailers.
 
 <img src="esrb-slate-example.png" alt="ESRB Slate Example" width="640" />
 
