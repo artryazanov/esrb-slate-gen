@@ -7,7 +7,7 @@ A Node.js-based tool for generating broadcast-compliant ESRB Rating Slates. This
 _Example generation for [Borderlands 4](https://www.esrb.org/ratings/40649/borderlands-4/)_
 
 [![CI](https://github.com/artryazanov/esrb-slate-gen/actions/workflows/ci.yml/badge.svg)](https://github.com/artryazanov/esrb-slate-gen/actions/workflows/ci.yml)
-[![License: Unlicense](https://img.shields.io/badge/license-Unlicense-blue.svg)](LICENSE)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 ![TypeScript](https://img.shields.io/badge/typescript-%23007ACC.svg?style=flat&logo=typescript&logoColor=white)
 ![Node.js](https://img.shields.io/badge/node.js-6DA55F?style=flat&logo=node.js&logoColor=white)
 ![Jest](https://img.shields.io/badge/-jest-%23C21325?style=flat&logo=jest&logoColor=white)
@@ -102,4 +102,4 @@ npm test
 
 ## License
 
-This project is released under the [Unlicense](LICENSE).
+This project is released under the [MIT License](LICENSE).
