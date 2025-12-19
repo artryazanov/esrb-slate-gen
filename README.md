@@ -67,7 +67,7 @@ _Example generation for [Borderlands 4](https://www.esrb.org/ratings/40649/borde
 
     **Manual Generation (No Scraping):**
     ```bash
-    npx ts-node src/index.ts --rating "M" --descriptors "Blood, Violence" --interactive "In-Game Purchases"
+    npx ts-node src/index.ts -r "M" -d "Blood, Violence" -i "In-Game Purchases"
     ```
 
 ## CLI Options
