@@ -74,9 +74,9 @@ _Example generation for [Borderlands 4](https://www.esrb.org/ratings/40649/borde
 
 | Option&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Alias | Description | Required | Default |
 | :--- | :--- | :--- | :--- | :--- |
-| `--game` | `-g` | Game title to search for | Yes (or --url/--rating) | - |
-| `--url` | `-u` | Direct ESRB URL (e.g., https://www.esrb.org/ratings/...) | Yes (or --game/--rating) | - |
-| `--rating` | `-r` | Manual Rating Category. Valid values: `E`, `E10plus`, `T`, `M`, `AO`, `RP` | Yes (if no game/url) | - |
+| `--game` | `-g` | Game title to search for | Yes (or -u/-r) | - |
+| `--url` | `-u` | Direct ESRB URL (e.g., https://www.esrb.org/ratings/...) | Yes (or -g/-r) | - |
+| `--rating` | `-r` | Manual Rating Category. Valid values: `E`, `E10plus`, `T`, `M`, `AO`, `RP` | Yes (if no -g/-u) | - |
 | `--descriptors` | `-d` | Manual Content Descriptors (comma-separated) | No | - |
 | `--interactive` | `-i` | Manual Interactive Elements (comma-separated) | No | - |
 | `--platform` | `-p` | Specific platform (e.g., "Xbox", "PS5") | No | - |
