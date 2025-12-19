@@ -13,6 +13,9 @@ program
   .version('1.0.0')
   .option('-g, --game <title>', 'Game title')
   .option('-u, --url <url>', 'ESRB game URL')
+  .option('-r, --rating <category>', 'Rating category (e.g., E, T, M)')
+  .option('-d, --descriptors <items>', 'Comma-separated list of content descriptors')
+  .option('-i, --interactive <items>', 'Comma-separated list of interactive elements')
   .option('-p, --platform <platform>', 'Game platform (optional)')
   .option('-o, --output <path>', 'Output file path', '/output/output.png')
   .option('-a, --aspect-ratio <ratio>', 'Content aspect ratio (e.g., 16:9, auto)', 'auto')
@@ -20,11 +23,11 @@ program
   .option('--4k', 'Generate in 4K resolution (3840x2160)')
   .action(async (options) => {
     try {
-      const { game, url, platform, output, margin, aspectRatio } = options;
+      const { game, url, platform, output, margin, aspectRatio, rating, descriptors, interactive } = options;
       const is4k = !!options['4k'];
 
-      if (!game && !url) {
-        Logger.error('Error: You must provide either a game title (-g) or an ESRB URL (-u).');
+      if (!game && !url && !rating) {
+        Logger.error('Error: You must provide either a game title (-g), an ESRB URL (-u), or a manual rating (-r).');
         process.exit(1);
       }
 
@@ -70,10 +73,39 @@ program
         Logger.info(`Starting process for URL: "${url}"`);
         if (is4k) Logger.info('Resolution: 4K (3840x2160)');
         data = await scraper.getGameDataFromUrl(url);
-      } else {
+      } else if (game) {
         Logger.info(`Starting process for game: "${game}"` + (platform ? ` on platform: "${platform}"` : ''));
         if (is4k) Logger.info('Resolution: 4K (3840x2160)');
         data = await scraper.getGameData(game, platform);
+      } else {
+        // purely manual mode
+        Logger.info('Starting manual generation process');
+        if (is4k) Logger.info('Resolution: 4K (3840x2160)');
+        data = {
+          title: '',
+          ratingCategory: '', // Will be overridden
+          descriptors: [],
+          interactiveElements: [],
+          platforms: undefined
+        };
+      }
+
+      // Apply overrides
+      if (rating) {
+        data.ratingCategory = rating;
+      }
+      if (descriptors) {
+        // split by comma and trim
+        data.descriptors = descriptors.split(',').map((s: string) => s.trim()).filter((s: string) => s.length > 0);
+      }
+      if (interactive) {
+        data.interactiveElements = interactive.split(',').map((s: string) => s.trim()).filter((s: string) => s.length > 0);
+      }
+
+      // Final validation after overrides
+      if (!data.ratingCategory) {
+        Logger.error('Error: Rating category is missing. If not scraping, you must provide a rating via -r.');
+        process.exit(1);
       }
 
       const outputPath = path.resolve(process.cwd(), output);

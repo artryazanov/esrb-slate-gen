@@ -65,12 +65,20 @@ _Example generation for [Borderlands 4](https://www.esrb.org/ratings/40649/borde
     ```
     *This will save the image to `output/output.png` by default.*
 
+    **Manual Generation (No Scraping):**
+    ```bash
+    npx ts-node src/index.ts --rating "M" --descriptors "Blood, Violence" --interactive "In-Game Purchases"
+    ```
+
 ## CLI Options
 
 | Option | Alias | Description | Required | Default |
 | :--- | :--- | :--- | :--- | :--- |
-| `--game` | `-g` | Game title to search for | Yes (or --url) | - |
-| `--url` | `-u` | Direct ESRB URL (e.g., https://www.esrb.org/ratings/...) | Yes (or --game) | - |
+| `--game` | `-g` | Game title to search for | Yes (or --url/--rating) | - |
+| `--url` | `-u` | Direct ESRB URL (e.g., https://www.esrb.org/ratings/...) | Yes (or --game/--rating) | - |
+| `--rating` | `-r` | Manual Rating Category. Valid values: `E`, `E10plus`, `T`, `M`, `AO`, `RP` | Yes (if no game/url) | - |
+| `--descriptors` | `-d` | Manual Content Descriptors (comma-separated) | No | - |
+| `--interactive` | `-i` | Manual Interactive Elements (comma-separated) | No | - |
 | `--platform` | `-p` | Specific platform (e.g., "Xbox", "PS5") | No | - |
 | `--output` | `-o` | Output file path. Extensions `.png`, `.jpg`, `.jpeg` supported. Defaults to `.png` if missing/invalid. | No | `output/output.png` |
 | `--margin` | `-m` | Horizontal margin (white box indentation) | No | `0` (Full Screen) |
