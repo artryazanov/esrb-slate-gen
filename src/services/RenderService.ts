@@ -466,7 +466,7 @@ export class RenderService {
       // Draw Text
       const interactText = filteredInteractive.slice(0, 3).join(', ');
 
-      const footerFontSize = fontSize * 1.04;
+      const footerFontSize = fontSize;
       ctx.font = `bold ${footerFontSize}px "Arimo", Arial, sans-serif`;
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
