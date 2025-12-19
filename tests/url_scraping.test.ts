@@ -51,7 +51,7 @@ describe('ScraperService URL Scraping', () => {
 
   test('should scrape game data correctly from valid URL', async () => {
     nock('https://www.esrb.org')
-      .get('/ratings/40649/borderlands-4/')
+      .get('/ratings/40649/')
       .reply(200, mockHtml);
 
     const data = await scraper.getGameDataFromUrl(validUrl);
@@ -70,7 +70,7 @@ describe('ScraperService URL Scraping', () => {
 
   test('should throw error if title is not found', async () => {
     nock('https://www.esrb.org')
-      .get('/ratings/40649/borderlands-4/')
+      .get('/ratings/40649/')
       .reply(200, '<html><body></body></html>');
 
     await expect(scraper.getGameDataFromUrl(validUrl)).rejects.toThrow('Could not extract game title');
@@ -78,7 +78,7 @@ describe('ScraperService URL Scraping', () => {
 
   test('should throw error on network failure', async () => {
     nock('https://www.esrb.org')
-      .get('/ratings/40649/borderlands-4/')
+      .get('/ratings/40649/')
       .replyWithError('Network Error');
 
     await expect(scraper.getGameDataFromUrl(validUrl)).rejects.toThrow('Network Error');

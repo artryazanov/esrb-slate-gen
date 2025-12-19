@@ -23,6 +23,16 @@ describe('ESRB Generator Tests', () => {
     nock.cleanAll();
   });
 
+  const mockDetailsHTML = `
+  <html><body>
+    <div class="synopsis-header"><h1>Borderlands 2</h1></div>
+    <div class="platforms-txt">Windows PC, PlayStation 3, Xbox 360</div>
+    <div class="info-img"><img src="m.svg" /></div>
+    <div class="description">Blood and Gore, Intense Violence, Language, Sexual Themes, Use of Alcohol</div>
+    <div class="other-info"><ul></ul></div>
+  </body></html>
+  `;
+
   test('Scraper should parse game data correctly', async () => {
     nock('https://www.esrb.org')
       .get('/search/')
@@ -30,6 +40,10 @@ describe('ESRB Generator Tests', () => {
         return obj.searchKeyword === 'Borderlands 2';
       })
       .reply(200, mockHTML);
+
+    nock('https://www.esrb.org')
+      .get('/ratings/32333/')
+      .reply(200, mockDetailsHTML);
 
     const data = await scraper.getGameData('Borderlands 2');
 
@@ -45,6 +59,10 @@ describe('ESRB Generator Tests', () => {
       .get('/search/')
       .query(true)
       .reply(200, mockHTML);
+
+    nock('https://www.esrb.org')
+      .get('/ratings/32333/')
+      .reply(200, mockDetailsHTML);
 
     const data = await scraper.getGameData('Borderlands 2', 'Windows PC');
     expect(data.title).toBe('Borderlands 2');

@@ -4,7 +4,7 @@ import { ScraperService } from '../src/services/ScraperService';
 const mockPage1HTML = `
 <div class="game">
     <div class="heading">
-        <h2><a href="#">DOOM: The Dark Ages</a></h2>
+        <h2><a href="/ratings/10010/DOOM+The+Dark+Ages">DOOM: The Dark Ages</a></h2>
         <div class="platforms">PC, PS5, Xbox Series</div>
     </div>
     <div class="content"><img src="m.svg" /></div>
@@ -14,11 +14,31 @@ const mockPage1HTML = `
 const mockPage2HTML = `
 <div class="game">
     <div class="heading">
-        <h2><a href="#">DOOM</a></h2>
+        <h2><a href="/ratings/10020/DOOM">DOOM</a></h2>
         <div class="platforms">PC, PS4, Xbox One</div>
     </div>
     <div class="content"><img src="m.svg" /></div>
 </div>
+`;
+
+const mockDetailsDOOM = `
+<html><body>
+    <div class="synopsis-header"><h1>DOOM</h1></div>
+    <div class="platforms-txt">PC, PS4, Xbox One</div>
+    <div class="info-img"><img src="m.svg" /></div>
+    <div class="description">Blood, Violence</div>
+    <div class="other-info"><ul></ul></div>
+</body></html>
+`;
+
+const mockDetailsDOOMDarkAges = `
+<html><body>
+    <div class="synopsis-header"><h1>DOOM: The Dark Ages</h1></div>
+    <div class="platforms-txt">PC, PS5, Xbox Series</div>
+    <div class="info-img"><img src="m.svg" /></div>
+    <div class="description">Blood, Violence</div>
+    <div class="other-info"><ul></ul></div>
+</body></html>
 `;
 
 describe('ScraperService Multi-Page Search', () => {
@@ -45,6 +65,11 @@ describe('ScraperService Multi-Page Search', () => {
             .query(obj => obj.searchKeyword === 'DOOM' && obj.pg === '2')
             .reply(200, mockPage2HTML);
 
+        // Detail mock for DOOM
+        nock('https://www.esrb.org')
+            .get('/ratings/10020/')
+            .reply(200, mockDetailsDOOM);
+
         const result = await scraper.getGameData('DOOM', 'PC');
 
         expect(result.title).toBe('DOOM');
@@ -56,6 +81,11 @@ describe('ScraperService Multi-Page Search', () => {
             .get('/search/')
             .query(obj => obj.searchKeyword === 'DOOM' && obj.pg == '1')
             .reply(200, mockPage2HTML); // Using page 2 content (which has exact match) as page 1
+
+        // Detail mock for DOOM
+        nock('https://www.esrb.org')
+            .get('/ratings/10020/')
+            .reply(200, mockDetailsDOOM);
 
         const result = await scraper.getGameData('DOOM', 'PC');
 
@@ -83,6 +113,11 @@ describe('ScraperService Multi-Page Search', () => {
             .query(obj => obj.searchKeyword === 'DOOM' && obj.pg == '3')
             .reply(200, mockPage2HTML); // Using page 2 content which has the exact match data we want
 
+        // Detail mock for DOOM
+        nock('https://www.esrb.org')
+            .get('/ratings/10020/')
+            .reply(200, mockDetailsDOOM);
+
         const result = await scraper.getGameData('DOOM', 'PC');
 
         expect(result.title).toBe('DOOM');
@@ -106,6 +141,11 @@ describe('ScraperService Multi-Page Search', () => {
             .get('/search/')
             .query(obj => obj.searchKeyword === 'DOOM' && obj.pg == '3')
             .reply(200, '<html></html>');
+
+        // Detail mock for DOOM: The Dark Ages (fallback)
+        nock('https://www.esrb.org')
+            .get('/ratings/10010/')
+            .reply(200, mockDetailsDOOMDarkAges);
 
         const result = await scraper.getGameData('DOOM', 'PC');
 

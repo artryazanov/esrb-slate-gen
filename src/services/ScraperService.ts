@@ -6,93 +6,10 @@ import { Logger } from '../utils/logger';
 export class ScraperService {
   private baseUrl = 'https://www.esrb.org/search/';
 
-  public async getGameData(query: string, platform?: string): Promise<ESRBData> {
+  public async getGameParamsById(id: number): Promise<ESRBData> {
+    const url = `https://www.esrb.org/ratings/${id}/`;
     try {
-      Logger.info(`Searching for "${query}" on ESRB...`);
-      const normalizedQuery = this.normalize(query);
-      const normalizedPlatform = platform ? this.normalize(platform) : null;
-      let page1Candidates: any[] = [];
-      const MAX_PAGES = 3;
-
-      for (let page = 1; page <= MAX_PAGES; page++) {
-        if (page > 1) {
-          Logger.info(`Exact match for "${query}" not found on page ${page - 1}. Checking page ${page}...`);
-        }
-
-        const candidates = await this.fetchCandidates(query, platform, page);
-
-        if (page === 1) {
-          page1Candidates = candidates;
-        }
-
-        const exactMatch = this.findExactMatch(candidates, normalizedQuery, normalizedPlatform);
-        if (exactMatch) {
-          return this.processGameResult(exactMatch.element, exactMatch.ratingImgSrc);
-        }
-      }
-
-      // 5. Fallback: Use Page 1 results for partial matching or first result fallback
-      const candidates = page1Candidates;
-      // (As per requirements: "if exact match not found... take first game from first page")
-
-      // Re-filter candidates from page 1 for platform if needed
-      const platformFilteredCandidates = normalizedPlatform
-        ? candidates.filter(c => c.platforms.includes(normalizedPlatform))
-        : candidates;
-
-      let targetGame: cheerio.Cheerio<any> | null = null;
-      let ratingImgSrc = '';
-
-      // Try Partial Title Match on Page 1
-      const partialMatch = platformFilteredCandidates.find(c => c.title.includes(normalizedQuery));
-      if (partialMatch) {
-        targetGame = partialMatch.element;
-        ratingImgSrc = partialMatch.ratingImgSrc;
-      }
-
-      // "Second Chance": Try to match ignoring platform (on Page 1)
-      if (!targetGame && normalizedPlatform) {
-        const exactMatchNoPlatform = candidates.find(c => c.title === normalizedQuery);
-        if (exactMatchNoPlatform) {
-          targetGame = exactMatchNoPlatform.element;
-          ratingImgSrc = exactMatchNoPlatform.ratingImgSrc;
-        } else {
-          const partialMatchNoPlatform = candidates.find(c => c.title.includes(normalizedQuery));
-          if (partialMatchNoPlatform) {
-            targetGame = partialMatchNoPlatform.element;
-            ratingImgSrc = partialMatchNoPlatform.ratingImgSrc;
-          }
-        }
-      }
-
-      // Ultimate Fallback: just take the first result from Page 1
-      if (!targetGame) {
-        if (candidates.length === 0) {
-          throw new Error(`Game "${query}" not found.`);
-        }
-        targetGame = candidates[0].element;
-        ratingImgSrc = candidates[0].ratingImgSrc;
-        Logger.warn(`Specific match not found. Using top result: ${targetGame!.find('.heading a').text()}`);
-      }
-
-      return this.processGameResult(targetGame!, ratingImgSrc);
-
-    } catch (error) {
-      Logger.error(`Scraping failed: ${(error as Error).message}`);
-      throw error;
-    }
-  }
-
-  public async getGameDataFromUrl(url: string): Promise<ESRBData> {
-    try {
-      // Validate URL mask: https://www.esrb.org/ratings/{int}/*
-      const urlRegex = /^https:\/\/www\.esrb\.org\/ratings\/\d+\/.+$/;
-      if (!urlRegex.test(url)) {
-        throw new Error('Invalid URL format. Expected: https://www.esrb.org/ratings/{id}/{slug}');
-      }
-
-      Logger.info(`Fetching data from: ${url}`);
-
+      Logger.info(`Fetching game data for ID: ${id}`);
       const { data } = await axios.get(url, {
         headers: {
           'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
@@ -139,6 +56,101 @@ export class ScraperService {
         platforms,
         interactiveElements: cleanInteractiveElements
       };
+
+    } catch (error) {
+      Logger.error(`Failed to fetch game params for ID ${id}: ${(error as Error).message}`);
+      throw error;
+    }
+  }
+
+  public async getGameData(query: string, platform?: string): Promise<ESRBData> {
+    try {
+      Logger.info(`Searching for "${query}" on ESRB...`);
+      const normalizedQuery = this.normalize(query);
+      const normalizedPlatform = platform ? this.normalize(platform) : null;
+      let page1Candidates: any[] = [];
+      const MAX_PAGES = 3;
+
+      for (let page = 1; page <= MAX_PAGES; page++) {
+        if (page > 1) {
+          Logger.info(`Exact match for "${query}" not found on page ${page - 1}. Checking page ${page}...`);
+        }
+
+        const candidates = await this.fetchCandidates(query, platform, page);
+
+        if (page === 1) {
+          page1Candidates = candidates;
+        }
+
+        const exactMatch = this.findExactMatch(candidates, normalizedQuery, normalizedPlatform);
+        if (exactMatch) {
+          const id = this.extractIdFromUrl(exactMatch.url);
+          if (id) {
+            return this.getGameParamsById(id);
+          }
+        }
+      }
+
+      // 5. Fallback: Use Page 1 results for partial matching or first result fallback
+      const candidates = page1Candidates;
+
+      // Re-filter candidates from page 1 for platform if needed
+      const platformFilteredCandidates = normalizedPlatform
+        ? candidates.filter(c => c.platforms.includes(normalizedPlatform))
+        : candidates;
+
+      let targetGameUrl: string = '';
+
+      // Try Partial Title Match on Page 1
+      const partialMatch = platformFilteredCandidates.find(c => c.title.includes(normalizedQuery));
+      if (partialMatch) {
+        targetGameUrl = partialMatch.url;
+      }
+
+      // "Second Chance": Try to match ignoring platform (on Page 1)
+      if (!targetGameUrl && normalizedPlatform) {
+        const exactMatchNoPlatform = candidates.find(c => c.title === normalizedQuery);
+        if (exactMatchNoPlatform) {
+          targetGameUrl = exactMatchNoPlatform.url;
+        } else {
+          const partialMatchNoPlatform = candidates.find(c => c.title.includes(normalizedQuery));
+          if (partialMatchNoPlatform) {
+            targetGameUrl = partialMatchNoPlatform.url;
+          }
+        }
+      }
+
+      // Ultimate Fallback: just take the first result from Page 1
+      if (!targetGameUrl) {
+        if (candidates.length === 0) {
+          throw new Error(`Game "${query}" not found.`);
+        }
+        targetGameUrl = candidates[0].url;
+        Logger.warn(`Specific match not found. Using top result: ${candidates[0].title}`);
+      }
+
+      const id = this.extractIdFromUrl(targetGameUrl);
+      if (!id) {
+        throw new Error(`Could not extract ID from URL: ${targetGameUrl}`);
+      }
+
+      return this.getGameParamsById(id);
+
+    } catch (error) {
+      Logger.error(`Scraping failed: ${(error as Error).message}`);
+      throw error;
+    }
+  }
+
+  public async getGameDataFromUrl(url: string): Promise<ESRBData> {
+    try {
+      // Validate URL mask and extract ID
+      const id = this.extractIdFromUrl(url);
+      if (!id) {
+        throw new Error('Invalid URL format. Expected: https://www.esrb.org/ratings/{id}/{slug}');
+      }
+
+      return this.getGameParamsById(id);
     } catch (error) {
       Logger.error(`Direct URL scraping failed: ${(error as Error).message}`);
       throw error;
@@ -161,14 +173,19 @@ export class ScraperService {
     const $ = cheerio.load(data);
     const gameResults = $('.game');
 
-    const candidates: { element: cheerio.Cheerio<any>, title: string, platforms: string, ratingImgSrc: string }[] = [];
+    const candidates: { element: cheerio.Cheerio<any>, title: string, platforms: string, ratingImgSrc: string, url: string }[] = [];
 
     gameResults.each((i, el) => {
       const currentElement = $(el);
-      const titleText = this.normalize(currentElement.find('.heading a').text());
+      const titleLink = currentElement.find('.heading a');
+      const titleText = this.normalize(titleLink.text());
       const platformsText = this.normalize(currentElement.find('.platforms').text());
       const ratingImgSrc = currentElement.find('.content img').attr('src') || '';
-      candidates.push({ element: currentElement, title: titleText, platforms: platformsText, ratingImgSrc });
+      // Extract URL from the link
+      const href = titleLink.attr('href') || '';
+      const fullUrl = href.startsWith('http') ? href : `https://www.esrb.org${href}`;
+
+      candidates.push({ element: currentElement, title: titleText, platforms: platformsText, ratingImgSrc, url: fullUrl });
     });
 
     return candidates;
@@ -183,89 +200,9 @@ export class ScraperService {
     return platformFiltered.find(c => c.title === normalizedQuery);
   }
 
-  private processGameResult(gameElement: cheerio.Cheerio<any>, ratingImgSrc: string): ESRBData {
-    const title = gameElement.find('.heading a').text().trim();
-    const ratingCategory = this.extractRatingFromUrl(ratingImgSrc);
-    const descriptorsText = gameElement.find('.content td').eq(1).text();
-
-    // Clean descriptors
-    const cleanDescriptors = descriptorsText
-      .replace(/^Content Descriptors:\s*/i, '')
-      .split(/,\s*/)
-      .map(d => d.trim())
-      .filter(d => d.length > 0);
-
-    Logger.info(`Found: ${title} [${ratingCategory}]`);
-
-    return {
-      title,
-      ratingCategory,
-      descriptors: cleanDescriptors,
-      platforms: gameElement.find('.platforms').text().trim(),
-      interactiveElements: this.extractInteractiveElements(gameElement)
-    };
-  }
-
-  private extractInteractiveElements(gameElement: cheerio.Cheerio<any>): string[] {
-    const cells = gameElement.find('.content td');
-    let interactiveCell: cheerio.Cheerio<any> | null = null;
-
-    for (let i = 0; i < cells.length; i++) {
-      const cell = cells.eq(i);
-      const text = cell.text();
-      // Heuristic: check for the label or specific known values if the label is missing
-      // The label is usually "Interactive Elements:" inside the cell text
-      if (text.includes('Interactive Elements')) {
-        interactiveCell = cell;
-        break;
-      }
-    }
-
-    // If not found by label, maybe it's the 3rd cell (index 2) if 3 columns exist
-    if (!interactiveCell && cells.length >= 3) {
-      interactiveCell = cells.eq(2);
-    }
-
-    if (!interactiveCell) {
-      return [];
-    }
-
-    // Extract text and process
-    // We want to process HTML to handle <br> or <p> if necessary, 
-    // but .text() usually works if we just want the content.
-    // However, the user wants to remove content in brackets (..).
-
-    // Let's get the raw text first, but we need to handle "No Interactive Elements"
-    const fullText = interactiveCell.text().trim();
-    if (fullText.includes('No Interactive Elements')) {
-      return [];
-    }
-
-    // Clean text: remove "Interactive Elements:" label
-    let cleanText = fullText.replace(/^Interactive Elements:\s*/i, '');
-
-    // The content might be formatted with <p> tags according to user.
-    // If we use .text(), "Users Interact (PC)In-Game Purchases (PC)" might be concatenated.
-    // Better to iterate over child elements if they exist.
-    const children = interactiveCell.children('p');
-    let elements: string[] = [];
-
-    if (children.length > 0) {
-      for (let i = 0; i < children.length; i++) {
-        elements.push(children.eq(i).text());
-      }
-    } else {
-      // Fallback: just split by some delimiters or take the whole text if it's one block
-      // Handling fallback when no paragraph tags are present.
-      // Assuming text content needs to be split by newlines as a safe default.
-      // If no P tags, we use text content split by newline.
-      elements = [cleanText];
-    }
-
-    // Clean up elements
-    return elements
-      .map(e => e.replace(/\s*\([^)]*\)/g, '').trim()) // Remove (...)
-      .filter(e => e.length > 0 && e !== 'Interactive Elements:'); // Filter empty
+  private extractIdFromUrl(url: string): number | null {
+    const match = url.match(/\/ratings\/(\d+)\//);
+    return match ? parseInt(match[1], 10) : null;
   }
 
   private extractRatingFromUrl(url: string): string {
