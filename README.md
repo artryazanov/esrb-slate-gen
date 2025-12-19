@@ -9,6 +9,10 @@ A Node.js-based tool for automatically generating broadcast-compliant ESRB Ratin
 ![Jest](https://img.shields.io/badge/-jest-%23C21325?style=flat&logo=jest&logoColor=white)
 [![code style: prettier](https://img.shields.io/badge/code_style-prettier-ff69b4.svg?style=flat)](https://github.com/prettier/prettier)
 
+<img src="esrb-slate-example.png" alt="ESRB Slate Example" width="640" />
+
+_Example generation for [Borderlands 4](https://www.esrb.org/ratings/40649/borderlands-4/)_
+
 ## Features
 
 *   **Automated Scraping:** Fetches rating category and content descriptors directly from ESRB.org.
