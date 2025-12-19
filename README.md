@@ -1,6 +1,6 @@
 # ESRB Rating Slate Generator
 
-A Node.js-based tool for automatically generating broadcast-compliant ESRB Rating Slates. This application scrapes the official [ESRB website](https://www.esrb.org) for game data and renders a high-resolution PNG image suitable for video trailers.
+A Node.js-based tool for automatically generating broadcast-compliant ESRB Rating Slates. This application can scrape the official [ESRB website](https://www.esrb.org) for game data or generate slates from manual input, rendering high-resolution PNG images suitable for video trailers.
 
 <img src="esrb-slate-example.png" alt="ESRB Slate Example" width="640" />
 
@@ -16,6 +16,7 @@ _Example generation for [Borderlands 4](https://www.esrb.org/ratings/40649/borde
 ## Features
 
 *   **Automated Scraping:** Fetches rating category and content descriptors directly from ESRB.org.
+*   **Manual Mode:** Generate slates by manually specifying rating, descriptors, and interactive elements.
 *   **Platform Filtering:** Optional filtering to target specific game versions (e.g., PS5 vs Xbox).
 *   **High-Quality Rendering:** Generates 1920x1080 (Full HD) images with correct layout and standard icons.
 *   **Docker Support:** Fully containerized environment ensuring consistent font and graphics rendering.
