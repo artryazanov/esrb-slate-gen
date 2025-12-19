@@ -72,7 +72,7 @@ _Example generation for [Borderlands 4](https://www.esrb.org/ratings/40649/borde
 
 ## CLI Options
 
-| Option | Alias | Description | Required | Default |
+| Option&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Alias | Description | Required | Default |
 | :--- | :--- | :--- | :--- | :--- |
 | `--game` | `-g` | Game title to search for | Yes (or --url/--rating) | - |
 | `--url` | `-u` | Direct ESRB URL (e.g., https://www.esrb.org/ratings/...) | Yes (or --game/--rating) | - |
