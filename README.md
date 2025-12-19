@@ -51,22 +51,31 @@ _Example generation for [Borderlands 4](https://www.esrb.org/ratings/40649/borde
       --output "/output/my-slate.png"
     ```
 
-### Using NPM / NPX
+### Using NPM (Node.js)
 
-You can run the CLI directly without Docker if you have Node.js installed.
+You can use the tool directly via `npx` or by installing it globally.
 
+**Quick Run (npx):**
+Since the package name (`esrb-slate-gen`) differs from the binary command (`esrb-gen`), use the `-p` flag:
 ```bash
-# Run directly with npx
-npx esrb-slate-gen --game "God of War"
+npx -p esrb-slate-gen esrb-gen --game "God of War"
+```
 
-# Or install globally
+**Global Installation:**
+```bash
 npm install -g esrb-slate-gen
+
+# Usage
 esrb-gen --url "https://www.esrb.org/ratings/39039/god-of-war-ragnarok/"
 ```
 
 **Manual Generation Example:**
 ```bash
-npx esrb-slate-gen -r "M" -d "Blood, Violence" -i "In-Game Purchases"
+# If installed globally:
+esrb-gen -r "M" -d "Blood, Violence" -i "In-Game Purchases"
+
+# Or via npx:
+npx -p esrb-slate-gen esrb-gen -r "M" -d "Blood, Violence" -i "In-Game Purchases"
 ```
 
 ## 2. Library Usage
