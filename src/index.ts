@@ -11,7 +11,7 @@ const program = new Command();
 program
   .name('esrb-gen')
   .description('Generates ESRB Rating Slates based on game title and platform')
-  .version('1.0.0')
+  .version('1.0.1')
   .option('-g, --game <title>', 'Game title')
   .option('-u, --url <url>', 'ESRB game URL')
   .option('-r, --rating <category>', 'Rating category (e.g., E, T, M)')
