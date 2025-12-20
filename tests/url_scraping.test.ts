@@ -73,7 +73,7 @@ describe('ScraperService URL Scraping', () => {
       .get('/ratings/40649/')
       .reply(200, '<html><body></body></html>');
 
-    await expect(scraper.getGameDataFromUrl(validUrl)).rejects.toThrow('Could not extract game title');
+    await expect(scraper.getGameDataFromUrl(validUrl, true)).rejects.toThrow('Could not extract game title');
   });
 
   test('should throw error on network failure', async () => {
@@ -81,6 +81,6 @@ describe('ScraperService URL Scraping', () => {
       .get('/ratings/40649/')
       .replyWithError('Network Error');
 
-    await expect(scraper.getGameDataFromUrl(validUrl)).rejects.toThrow('Network Error');
+    await expect(scraper.getGameDataFromUrl(validUrl, true)).rejects.toThrow('Network Error');
   });
 });
