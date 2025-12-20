@@ -70,6 +70,7 @@ describe('RenderService Font Size Constraints', () => {
         jest.spyOn(console, 'log').mockImplementation(() => { });
 
         const outputPath = path.join(__dirname, '../output/test-output.png');
+        fs.mkdirSync(path.dirname(outputPath), { recursive: true });
         await renderer.generate(data, outputPath);
 
         // Capture all font assignments
@@ -95,6 +96,7 @@ describe('RenderService Font Size Constraints', () => {
 
         // Create a new output path variable to avoid redeclaration or reuse carefully
         const secondOutputPath = path.join(__dirname, '../output/test-output.png');
+        fs.mkdirSync(path.dirname(secondOutputPath), { recursive: true });
         await renderer.generate(data, secondOutputPath);
 
         console.log('Font values set:', fontValues);
