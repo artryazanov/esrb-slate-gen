@@ -69,21 +69,15 @@ describe('RenderService Font Size Constraints', () => {
         // Let's just mock console.log to avoid noise
         jest.spyOn(console, 'log').mockImplementation(() => { });
 
-        await renderer.generate(data, 'output.png');
+        const outputPath = path.join(__dirname, '../output/test-output.png');
+        await renderer.generate(data, outputPath);
 
         // Capture all font assignments
         // The code assigns font for descriptors, then later for footer (interactive)
         // We expect multiple assignments.
 
         // RenderService.ts logic:
-        // Loop for descriptors font sizing (uses temp canvas or actual ctx? code uses tempCanvas for "Auto Aspect Ratio" but main logic uses loop?)
-        // Wait, the main logic:
-        // Line 127: tempCtx.font = ... (in auto aspect ratio logic, ONLY if heightFactor === 0)
-        // Line 431: ctx.font = ... (Descriptors)
-        // Line 470: ctx.font = ... (Interactive)
-
-        // We are calling with default heightFactor (9/16)? No, default is 9/16.
-        // So Auto Aspect Ratio logic is skipped.
+        // We need to capture the assignments to mockContext.font.
 
         // We need to capture the assignments to mockContext.font.
         // Since mockContext is a plain object in our mock, we can just spy on the setter if we used a class, or check the assignments.
@@ -99,43 +93,14 @@ describe('RenderService Font Size Constraints', () => {
             get: () => '',
         });
 
-        await renderer.generate(data, 'output.png');
+        // Create a new output path variable to avoid redeclaration or reuse carefully
+        const secondOutputPath = path.join(__dirname, '../output/test-output.png');
+        await renderer.generate(data, secondOutputPath);
 
         console.log('Font values set:', fontValues);
 
         // Filter for the main font assignments we care about.
-        // They look like: 'bold 82px "Arimo", Arial, sans-serif'
-
-        // There might be intermediate assignments during the "fitting" loop?
-        // Line 299: for (let i = 0; i < 20; i++) ...
-        // Inside the loop: `const totalMinHeight...` 
-        // It doesn't actually set ctx.font inside the loop! It just calculates `fontSize`.
-        // It sets `ctx.font` AFTER the loop at line 431.
-        // And then for footer at line 470.
-
-        // So we should see exactly two main font settings (plus maybe some for temp canvas if that code ran, but it shouldn't here).
-
-        // Wait, `tempCtx` is created in "Auto Aspect Ratio Logic" which runs if heightFactor === 0.
-        // The `generate` method default for heightFactor is 9/16. So no tempCtx usage.
-
-        // However, does the "fitting" loop use `measureText`?
-        // Line 299 loop:
-        // It uses `fontSize` to calculate height constraints. It DOES NOT use `measureText` to check width fitting in the main render logic?
-        // Let's re-read RenderService.ts.
-
-        // Lines 298-321:
-        // It calculates `fontSize` based on *vertical* space (totalMinHeight vs availableTextHeight).
-        // It does NOT appear to check width in this loop?
-        // Validating...
-        // Line 435: `data.descriptors.forEach... ctx.fillText...`
-        // It just draws it. It expects it to fit?
-        // Ah, wait. The "Auto Aspect Ratio" block (Lines 59-150) does check width using `measureText`.
-        // But the main block (Lines 296+) only adjusts based on height/vertical constraints?
-        // "Iteratively reduce font size until text fits with a minimum baseline gap"
-
-        // Yes, it seems so.
-
-        // So, we expect:
+        // We expect:
         // 1. ctx.font = `bold ${descriptorFontSize}px ...`
         // 2. ctx.font = `bold ${footerFontSize}px ...`
 
@@ -146,8 +111,8 @@ describe('RenderService Font Size Constraints', () => {
             return match ? parseFloat(match[1]) : 0;
         };
 
-        const descriptorFontStr = fontValues.find(v => v.includes('Arimo') && !v.includes('undefined')); // The loop doesn't set it.
-        // actually we expect the LAST two to be descriptor and then footer.
+        const descriptorFontStr = fontValues.find(v => v.includes('Arimo') && !v.includes('undefined'));
+        // We expect the LAST two to be descriptor and then footer.
 
         // If there are only 2, great.
         const descriptorAssign = fontValues[0];

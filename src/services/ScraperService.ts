@@ -2,11 +2,36 @@ import axios from 'axios';
 import * as cheerio from 'cheerio';
 import { ESRBData } from '../interfaces';
 import { Logger } from '../utils/logger';
+import fs from 'fs';
+import path from 'path';
 
 export class ScraperService {
   private baseUrl = 'https://www.esrb.org/search/';
+  private cacheDir = path.resolve(process.cwd(), '.esrb-cache');
 
-  public async getGameParamsById(id: number): Promise<ESRBData> {
+  constructor() {
+    if (!fs.existsSync(this.cacheDir)) {
+      fs.mkdirSync(this.cacheDir, { recursive: true });
+    }
+  }
+
+  private getCachePath(id: number): string {
+    return path.join(this.cacheDir, `${id}.json`);
+  }
+
+  public async getGameParamsById(id: number, force: boolean = false): Promise<ESRBData> {
+    const cachePath = this.getCachePath(id);
+
+    if (!force && fs.existsSync(cachePath)) {
+      try {
+        const cached = fs.readFileSync(cachePath, 'utf-8');
+        Logger.info(`Loaded game params from cache for ID: ${id}`);
+        return JSON.parse(cached) as ESRBData;
+      } catch (e) {
+        Logger.warn(`Failed to read cache for ID ${id}, will fetch from network.`);
+      }
+    }
+
     const url = `https://www.esrb.org/ratings/${id}/`;
     try {
       Logger.info(`Fetching game data for ID: ${id}`);
@@ -49,7 +74,7 @@ export class ScraperService {
 
       Logger.info(`Found: ${title} [${ratingCategory}]`);
 
-      return {
+      const result = {
         title,
         ratingCategory,
         descriptors,
@@ -57,13 +82,22 @@ export class ScraperService {
         interactiveElements: cleanInteractiveElements
       };
 
+      try {
+        fs.writeFileSync(cachePath, JSON.stringify(result, null, 2));
+        Logger.info(`Saved game params to cache for ID: ${id}`);
+      } catch (e) {
+        Logger.warn(`Failed to save cache for ID ${id}: ${(e as Error).message}`);
+      }
+
+      return result;
+
     } catch (error) {
       Logger.error(`Failed to fetch game params for ID ${id}: ${(error as Error).message}`);
       throw error;
     }
   }
 
-  public async getGameData(query: string, platform?: string): Promise<ESRBData> {
+  public async getGameData(query: string, platform?: string, force: boolean = false): Promise<ESRBData> {
     try {
       Logger.info(`Searching for "${query}" on ESRB...`);
       const normalizedQuery = this.normalize(query);
@@ -86,7 +120,7 @@ export class ScraperService {
         if (exactMatch) {
           const id = this.extractIdFromUrl(exactMatch.url);
           if (id) {
-            return this.getGameParamsById(id);
+            return this.getGameParamsById(id, force);
           }
         }
       }
@@ -134,7 +168,7 @@ export class ScraperService {
         throw new Error(`Could not extract ID from URL: ${targetGameUrl}`);
       }
 
-      return this.getGameParamsById(id);
+      return this.getGameParamsById(id, force);
 
     } catch (error) {
       Logger.error(`Scraping failed: ${(error as Error).message}`);
@@ -142,7 +176,7 @@ export class ScraperService {
     }
   }
 
-  public async getGameDataFromUrl(url: string): Promise<ESRBData> {
+  public async getGameDataFromUrl(url: string, force: boolean = false): Promise<ESRBData> {
     try {
       // Validate URL mask and extract ID
       const id = this.extractIdFromUrl(url);
@@ -150,7 +184,7 @@ export class ScraperService {
         throw new Error('Invalid URL format. Expected: https://www.esrb.org/ratings/{id}/{slug}');
       }
 
-      return this.getGameParamsById(id);
+      return this.getGameParamsById(id, force);
     } catch (error) {
       Logger.error(`Direct URL scraping failed: ${(error as Error).message}`);
       throw error;

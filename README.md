@@ -24,6 +24,7 @@ _Example generation for [Borderlands 4](https://www.esrb.org/ratings/40649/borde
 *   **Platform Filtering:** Optional filtering to target specific game versions (e.g., PS5 vs Xbox).
 *   **High-Quality Rendering:** Generates 1920x1080 (Full HD) images with correct layout and standard icons.
 *   **Docker Support:** Fully containerized environment ensuring consistent font and graphics rendering.
+*   **Caching:** Caches scraped data locally to reduce network requests.
 *   **TypeScript:** Type-safe codebase.
 
 ## Prerequisites
@@ -45,11 +46,17 @@ _Example generation for [Borderlands 4](https://www.esrb.org/ratings/40649/borde
 2.  **Run the generator:**
     Mount the current directory to `/output` inside the container to save the file locally.
     ```bash
-    docker run --rm -v $(pwd)/output:/output esrb-gen \
-      --game "Borderlands 2" \
+    docker run --rm \
+      -v $(pwd)/output:/output \
+      -v $(pwd)/.esrb-cache:/app/.esrb-cache \
+      esrb-gen \
+      --game "Borderlands 4" \
       --platform "PC" \
       --output "/output/my-slate.png"
     ```
+
+    > [!NOTE]
+    > To make caching work across Docker runs (which are ephemeral), you must mount the `.esrb-cache` directory to `/app/.esrb-cache` inside the container as shown above.
 
 ### Using NPM (Node.js)
 
@@ -66,7 +73,7 @@ npx -p esrb-slate-gen esrb-gen --game "God of War"
 npm install -g esrb-slate-gen
 
 # Usage
-esrb-gen --url "https://www.esrb.org/ratings/39039/god-of-war-ragnarok/"
+esrb-gen --url "https://www.esrb.org/ratings/40649/borderlands-4/"
 ```
 
 **Manual Generation Example:**
@@ -141,6 +148,7 @@ generateSlate();
 | `--margin` | `-m` | Horizontal margin (white box indentation) | No | `0` (Full Screen) |
 | `--aspect-ratio` | `-a` | Content box aspect ratio. **Default `0` margin expands resolution (Variable Width).** Margin > 0 uses fixed 1920x1080 (Letterboxed). | No | `auto` |
 | `--4k` | | Generate in 4K resolution (3840x2160) | No | `false` |
+| `--force` | | Ignore cache and force re-download of game data | No | `false` |
 
 ## Testing
 

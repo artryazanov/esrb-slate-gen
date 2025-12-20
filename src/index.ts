@@ -11,7 +11,7 @@ const program = new Command();
 program
   .name('esrb-gen')
   .description('Generates ESRB Rating Slates based on game title and platform')
-  .version('1.0.2')
+  .version('1.0.3')
   .option('-g, --game <title>', 'Game title')
   .option('-u, --url <url>', 'ESRB game URL')
   .option('-r, --rating <category>', 'Rating category (e.g., E, T, M)')
@@ -22,10 +22,12 @@ program
   .option('-a, --aspect-ratio <ratio>', 'Content aspect ratio (e.g., 16:9, auto)', 'auto')
   .option('-m, --margin <number>', 'Margin from screen edges (default: 0)', '0')
   .option('--4k', 'Generate in 4K resolution (3840x2160)')
+  .option('--force', 'Ignore cache and force re-download of game data')
   .action(async (options) => {
     try {
       const { game, url, platform, output, margin, aspectRatio, rating, descriptors, interactive } = options;
       const is4k = !!options['4k'];
+      const force = !!options['force'];
 
       if (!game && !url && !rating) {
         Logger.error('Error: You must provide either a game title (-g), an ESRB URL (-u), or a manual rating (-r).');
@@ -73,11 +75,13 @@ program
       if (url) {
         Logger.info(`Starting process for URL: "${url}"`);
         if (is4k) Logger.info('Resolution: 4K (3840x2160)');
-        data = await scraper.getGameDataFromUrl(url);
+        if (force) Logger.info('Forcing refresh (ignoring cache)');
+        data = await scraper.getGameDataFromUrl(url, force);
       } else if (game) {
         Logger.info(`Starting process for game: "${game}"` + (platform ? ` on platform: "${platform}"` : ''));
         if (is4k) Logger.info('Resolution: 4K (3840x2160)');
-        data = await scraper.getGameData(game, platform);
+        if (force) Logger.info('Forcing refresh (ignoring cache)');
+        data = await scraper.getGameData(game, platform, force);
       } else {
         // purely manual mode
         Logger.info('Starting manual generation process');
