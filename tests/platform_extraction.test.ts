@@ -44,7 +44,7 @@ describe('ScraperService Platform Extraction', () => {
     jest.spyOn(Logger, 'warn').mockImplementation(() => ({}) as any);
 
     // Mock fs.writeFileSync to avoid writing to real cache
-    jest.spyOn(fs, 'writeFileSync').mockImplementation(() => { });
+    jest.spyOn(fs, 'writeFileSync').mockImplementation(() => {});
   });
 
   afterAll(() => {
