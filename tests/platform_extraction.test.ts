@@ -1,4 +1,3 @@
-
 import nock from 'nock';
 import { ScraperService } from '../src/services/ScraperService';
 import { Logger } from '../src/utils/logger';
@@ -44,7 +43,7 @@ describe('ScraperService Platform Extraction', () => {
     jest.spyOn(Logger, 'warn').mockImplementation(() => ({}) as any);
 
     // Mock fs.writeFileSync to avoid writing to real cache
-    jest.spyOn(fs, 'writeFileSync').mockImplementation(() => { });
+    jest.spyOn(fs, 'writeFileSync').mockImplementation(() => {});
   });
 
   afterAll(() => {
@@ -56,9 +55,7 @@ describe('ScraperService Platform Extraction', () => {
   });
 
   test('should extract only the first platforms-txt occurance', async () => {
-    nock('https://www.esrb.org')
-      .get(`/ratings/${gameId}/`)
-      .reply(200, mockHtml);
+    nock('https://www.esrb.org').get(`/ratings/${gameId}/`).reply(200, mockHtml);
 
     // Using force=true to bypass cache reading
     const data = await scraper.getGameParamsById(gameId, true);

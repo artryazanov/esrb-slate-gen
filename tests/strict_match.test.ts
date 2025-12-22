@@ -43,74 +43,65 @@ const mockDetailsHTML_BL2VR = `
 `;
 
 describe('ScraperService Strict Matching', () => {
-    let scraper: ScraperService;
+  let scraper: ScraperService;
 
-    beforeAll(() => {
-        scraper = new ScraperService();
-    });
+  beforeAll(() => {
+    scraper = new ScraperService();
+  });
 
-    afterEach(() => {
-        nock.cleanAll();
-    });
+  afterEach(() => {
+    nock.cleanAll();
+  });
 
-    test('should prioritize exact match over partial match when exact match appears later', async () => {
-        nock('https://www.esrb.org')
-            .get('/search/')
-            .query(true) // match any query
-            .reply(200, mockAmbiguousHTML);
+  test('should prioritize exact match over partial match when exact match appears later', async () => {
+    nock('https://www.esrb.org')
+      .get('/search/')
+      .query(true) // match any query
+      .reply(200, mockAmbiguousHTML);
 
-        // Mock details for the exact match
-        nock('https://www.esrb.org')
-            .get('/ratings/10002/')
-            .reply(200, mockDetailsHTML_BL2);
+    // Mock details for the exact match
+    nock('https://www.esrb.org').get('/ratings/10002/').reply(200, mockDetailsHTML_BL2);
 
-        // Searching for "Borderlands 2"
-        // Current behavior (bug): Picks "Borderlands 2 VR" because it's first and includes "Borderlands 2".
-        // Desired behavior: Pick "Borderlands 2" because it matches exactly.
-        const result = await scraper.getGameData('Borderlands 2', 'PC');
+    // Searching for "Borderlands 2"
+    // Current behavior (bug): Picks "Borderlands 2 VR" because it's first and includes "Borderlands 2".
+    // Desired behavior: Pick "Borderlands 2" because it matches exactly.
+    const result = await scraper.getGameData('Borderlands 2', 'PC');
 
-        expect(result.title).toBe('Borderlands 2');
-    });
+    expect(result.title).toBe('Borderlands 2');
+  });
 
-    test('should prioritize exact match regardless of case', async () => {
-        nock('https://www.esrb.org')
-            .get('/search/')
-            .query(true)
-            .reply(200, mockAmbiguousHTML);
+  test('should prioritize exact match regardless of case', async () => {
+    nock('https://www.esrb.org').get('/search/').query(true).reply(200, mockAmbiguousHTML);
 
-        nock('https://www.esrb.org')
-            .get('/ratings/10002/')
-            .reply(200, mockDetailsHTML_BL2);
+    nock('https://www.esrb.org').get('/ratings/10002/').reply(200, mockDetailsHTML_BL2);
 
-        const result = await scraper.getGameData('borderlands 2', 'PC');
-        expect(result.title).toBe('Borderlands 2');
-    });
+    const result = await scraper.getGameData('borderlands 2', 'PC');
+    expect(result.title).toBe('Borderlands 2');
+  });
 
-    test('should fall back to partial match if no exact match found', async () => {
-        nock('https://www.esrb.org')
-            .get('/search/')
-            .query(obj => obj.searchKeyword === 'VR' && obj.pg == '1')
-            .reply(200, mockAmbiguousHTML);
+  test('should fall back to partial match if no exact match found', async () => {
+    nock('https://www.esrb.org')
+      .get('/search/')
+      .query((obj) => obj.searchKeyword === 'VR' && obj.pg == '1')
+      .reply(200, mockAmbiguousHTML);
 
-        // Mock Page 2 request (Nothing found)
-        nock('https://www.esrb.org')
-            .get('/search/')
-            .query(obj => obj.searchKeyword === 'VR' && obj.pg == '2')
-            .reply(200, '<html></html>');
+    // Mock Page 2 request (Nothing found)
+    nock('https://www.esrb.org')
+      .get('/search/')
+      .query((obj) => obj.searchKeyword === 'VR' && obj.pg == '2')
+      .reply(200, '<html></html>');
 
-        // Mock Page 3 request (Nothing found)
-        nock('https://www.esrb.org')
-            .get('/search/')
-            .query(obj => obj.searchKeyword === 'VR' && obj.pg == '3')
-            .reply(200, '<html></html>');
+    // Mock Page 3 request (Nothing found)
+    nock('https://www.esrb.org')
+      .get('/search/')
+      .query((obj) => obj.searchKeyword === 'VR' && obj.pg == '3')
+      .reply(200, '<html></html>');
 
-        // Mock details for "Borderlands 2 VR" (partial match)
-        nock('https://www.esrb.org')
-            .get('/ratings/10001/')
-            .reply(200, mockDetailsHTML_BL2VR);
+    // Mock details for "Borderlands 2 VR" (partial match)
+    nock('https://www.esrb.org').get('/ratings/10001/').reply(200, mockDetailsHTML_BL2VR);
 
-        // "Borderlands 2 VR" is the only thing matching "VR"
-        const result = await scraper.getGameData('VR', 'PC');
-        expect(result.title).toBe('Borderlands 2 VR');
-    });
+    // "Borderlands 2 VR" is the only thing matching "VR"
+    const result = await scraper.getGameData('VR', 'PC');
+    expect(result.title).toBe('Borderlands 2 VR');
+  });
 });

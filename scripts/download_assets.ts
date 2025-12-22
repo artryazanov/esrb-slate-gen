@@ -5,51 +5,50 @@ import path from 'path';
 const ICONS_DIR = path.join(__dirname, '../assets/icons');
 const FONTS_DIR = path.join(__dirname, '../assets/fonts');
 const BASE_URL = 'https://www.esrb.org/wp-content/themes/esrb/assets/images/';
-const FONT_URL = 'https://raw.githubusercontent.com/google/fonts/main/apache/arimo/Arimo%5Bwght%5D.ttf';
+const FONT_URL =
+  'https://raw.githubusercontent.com/google/fonts/main/apache/arimo/Arimo%5Bwght%5D.ttf';
 
-const icons = [
-    'E', 'E10plus', 'T', 'M', 'AO', 'RP'
-];
+const icons = ['E', 'E10plus', 'T', 'M', 'AO', 'RP'];
 
 async function downloadFile(filename: string) {
-    const url = `${BASE_URL}${filename}.svg`;
-    const outputPath = path.join(ICONS_DIR, `${filename}.svg`);
+  const url = `${BASE_URL}${filename}.svg`;
+  const outputPath = path.join(ICONS_DIR, `${filename}.svg`);
 
-    console.log(`Downloading ${url}...`);
-    try {
-        const response = await axios.get(url, { responseType: 'arraybuffer' });
-        fs.writeFileSync(outputPath, response.data);
-        console.log(`Saved to ${outputPath}`);
-    } catch (e: any) {
-        console.error(`Failed to download ${filename}: ${e.message}`);
-    }
+  console.log(`Downloading ${url}...`);
+  try {
+    const response = await axios.get(url, { responseType: 'arraybuffer' });
+    fs.writeFileSync(outputPath, response.data);
+    console.log(`Saved to ${outputPath}`);
+  } catch (e: any) {
+    console.error(`Failed to download ${filename}: ${e.message}`);
+  }
 }
 
 async function downloadFont() {
-    const outputPath = path.join(FONTS_DIR, 'Arimo-Variable.ttf');
-    console.log(`Downloading Font from ${FONT_URL}...`);
-    try {
-        const response = await axios.get(FONT_URL, { responseType: 'arraybuffer' });
-        fs.writeFileSync(outputPath, response.data);
-        console.log(`Saved font to ${outputPath}`);
-    } catch (e: any) {
-        console.error(`Failed to download font: ${e.message}`);
-    }
+  const outputPath = path.join(FONTS_DIR, 'Arimo-Variable.ttf');
+  console.log(`Downloading Font from ${FONT_URL}...`);
+  try {
+    const response = await axios.get(FONT_URL, { responseType: 'arraybuffer' });
+    fs.writeFileSync(outputPath, response.data);
+    console.log(`Saved font to ${outputPath}`);
+  } catch (e: any) {
+    console.error(`Failed to download font: ${e.message}`);
+  }
 }
 
 async function main() {
-    if (!fs.existsSync(ICONS_DIR)) {
-        fs.mkdirSync(ICONS_DIR, { recursive: true });
-    }
-    if (!fs.existsSync(FONTS_DIR)) {
-        fs.mkdirSync(FONTS_DIR, { recursive: true });
-    }
+  if (!fs.existsSync(ICONS_DIR)) {
+    fs.mkdirSync(ICONS_DIR, { recursive: true });
+  }
+  if (!fs.existsSync(FONTS_DIR)) {
+    fs.mkdirSync(FONTS_DIR, { recursive: true });
+  }
 
-    await downloadFont();
+  await downloadFont();
 
-    for (const icon of icons) {
-        await downloadFile(icon);
-    }
+  for (const icon of icons) {
+    await downloadFile(icon);
+  }
 }
 
 main();

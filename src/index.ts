@@ -25,12 +25,15 @@ program
   .option('--force', 'Ignore cache and force re-download of game data')
   .action(async (options) => {
     try {
-      const { game, url, platform, output, margin, aspectRatio, rating, descriptors, interactive } = options;
+      const { game, url, platform, output, margin, aspectRatio, rating, descriptors, interactive } =
+        options;
       const is4k = !!options['4k'];
       const force = !!options['force'];
 
       if (!game && !url && !rating) {
-        Logger.error('Error: You must provide either a game title (-g), an ESRB URL (-u), or a manual rating (-r).');
+        Logger.error(
+          'Error: You must provide either a game title (-g), an ESRB URL (-u), or a manual rating (-r).',
+        );
         process.exit(1);
       }
 
@@ -61,7 +64,9 @@ program
         const maxRatio = 21 / 9; // ~2.33
 
         if (ratioValue < minRatio || ratioValue > maxRatio) {
-          Logger.error(`Error: Aspect ratio must be between 16:9 and 21:9. Provided: ${aspectRatio}`);
+          Logger.error(
+            `Error: Aspect ratio must be between 16:9 and 21:9. Provided: ${aspectRatio}`,
+          );
           process.exit(1);
         }
 
@@ -78,7 +83,9 @@ program
         if (force) Logger.info('Forcing refresh (ignoring cache)');
         data = await scraper.getGameDataFromUrl(url, force);
       } else if (game) {
-        Logger.info(`Starting process for game: "${game}"` + (platform ? ` on platform: "${platform}"` : ''));
+        Logger.info(
+          `Starting process for game: "${game}"` + (platform ? ` on platform: "${platform}"` : ''),
+        );
         if (is4k) Logger.info('Resolution: 4K (3840x2160)');
         if (force) Logger.info('Forcing refresh (ignoring cache)');
         data = await scraper.getGameData(game, platform, force);
@@ -91,7 +98,7 @@ program
           ratingCategory: '', // Will be overridden
           descriptors: [],
           interactiveElements: [],
-          platforms: undefined
+          platforms: undefined,
         };
       }
 
@@ -101,15 +108,23 @@ program
       }
       if (descriptors) {
         // split by comma and trim
-        data.descriptors = descriptors.split(',').map((s: string) => s.trim()).filter((s: string) => s.length > 0);
+        data.descriptors = descriptors
+          .split(',')
+          .map((s: string) => s.trim())
+          .filter((s: string) => s.length > 0);
       }
       if (interactive) {
-        data.interactiveElements = interactive.split(',').map((s: string) => s.trim()).filter((s: string) => s.length > 0);
+        data.interactiveElements = interactive
+          .split(',')
+          .map((s: string) => s.trim())
+          .filter((s: string) => s.length > 0);
       }
 
       // Final validation after overrides
       if (!data.ratingCategory) {
-        Logger.error('Error: Rating category is missing. If not scraping, you must provide a rating via -r.');
+        Logger.error(
+          'Error: Rating category is missing. If not scraping, you must provide a rating via -r.',
+        );
         process.exit(1);
       }
 
@@ -128,7 +143,9 @@ program
 
       if (!supportedExtensions.includes(ext)) {
         finalOutputPath += '.png';
-        Logger.info(`Output file extension not supported or missing. Appending .png to filename: ${path.basename(finalOutputPath)}`);
+        Logger.info(
+          `Output file extension not supported or missing. Appending .png to filename: ${path.basename(finalOutputPath)}`,
+        );
       }
 
       await renderer.generate(data, finalOutputPath, parseInt(margin, 10), is4k, heightFactor);

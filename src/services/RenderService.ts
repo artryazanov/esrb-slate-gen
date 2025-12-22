@@ -53,7 +53,13 @@ export class RenderService {
     }
   }
 
-  public async generate(data: ESRBData, outputPath: string, margin: number = 0, is4k: boolean = false, heightFactor: number = 9 / 16): Promise<void> {
+  public async generate(
+    data: ESRBData,
+    outputPath: string,
+    margin: number = 0,
+    is4k: boolean = false,
+    heightFactor: number = 9 / 16,
+  ): Promise<void> {
     const isVariableWidth = margin === 0;
 
     // Fixed height reference
@@ -64,12 +70,12 @@ export class RenderService {
       Logger.info('Auto Aspect Ratio: calculating optimal width...');
       const iconAR = await this.getIconAR(data.ratingCategory);
 
-      let bestW = 21; // fallback
+      const bestW = 21; // fallback
       let found = false;
 
       // Filter descriptors for calculation (same as render logic)
-      const filteredInteractive = (data.interactiveElements || []).filter(el =>
-        !el.toLowerCase().includes('not rated by the esrb')
+      const filteredInteractive = (data.interactiveElements || []).filter(
+        (el) => !el.toLowerCase().includes('not rated by the esrb'),
       );
       const hasInteractive = filteredInteractive.length > 0;
 
@@ -92,7 +98,7 @@ export class RenderService {
         } else {
           // In fixed width mode (margin > 0)
           const baseCanvasWidth = is4k ? 3840 : 1920;
-          boxWidth = baseCanvasWidth - (margin * 2);
+          boxWidth = baseCanvasWidth - margin * 2;
           totalBoxHeight = boxWidth * hf;
         }
 
@@ -115,7 +121,7 @@ export class RenderService {
         const startX = 0; // Relative to box
 
         // Icon width
-        const maxIconHeight = mainBoxHeight - (iconPadding * 2);
+        const maxIconHeight = mainBoxHeight - iconPadding * 2;
         const iconW = maxIconHeight * iconAR;
         const iconX = startX + iconPadding;
 
@@ -179,13 +185,12 @@ export class RenderService {
       canvasWidth = is4k ? 3840 : 1920;
       canvasHeight = fixedHeight;
 
-      boxWidth = canvasWidth - (margin * 2);
+      boxWidth = canvasWidth - margin * 2;
       totalBoxHeight = boxWidth * heightFactor;
 
       startX = margin;
       startY = (canvasHeight - totalBoxHeight) / 2;
     }
-
 
     const canvas = createCanvas(canvasWidth, canvasHeight);
     const ctx = canvas.getContext('2d');
@@ -202,7 +207,7 @@ export class RenderService {
 
     // If No Descriptors case
     // Special handling for "No Descriptors" case.
-    // Preserving variable width/canvas sizing logic calculated above, 
+    // Preserving variable width/canvas sizing logic calculated above,
     // ensuring consistency with the "auto" aspect ratio determination (likely 21:9 if empty).
     // The visual output will center the icon on the calculated canvas.
     if (data.descriptors.length === 1 && data.descriptors[0] === 'No Descriptors') {
@@ -225,7 +230,7 @@ export class RenderService {
 
         let iconImage: any;
         let iconW = 0;
-        let iconH = canvasHeight; // Full height
+        const iconH = canvasHeight; // Full height
 
         if (iconPath.endsWith('.svg')) {
           const svgContent = fs.readFileSync(iconPath, 'utf-8');
@@ -259,10 +264,9 @@ export class RenderService {
       }
     }
 
-
     // Filter out "Not Rated by the ESRB" from interactive elements
-    const filteredInteractive = (data.interactiveElements || []).filter(el =>
-      !el.toLowerCase().includes('not rated by the esrb')
+    const filteredInteractive = (data.interactiveElements || []).filter(
+      (el) => !el.toLowerCase().includes('not rated by the esrb'),
     );
 
     const hasInteractive = filteredInteractive.length > 0;
@@ -288,12 +292,10 @@ export class RenderService {
     const textPadding = 32 * scaleFactor;
 
     // Calculate available height for text
-    const frameH = hasInteractive
-      ? mainBoxHeight - frameMargin
-      : mainBoxHeight - (frameMargin * 2);
+    const frameH = hasInteractive ? mainBoxHeight - frameMargin : mainBoxHeight - frameMargin * 2;
 
     // Available vertical space inside the frame
-    const availableTextHeight = frameH - (frameThickness * 2) - (20 * scaleFactor);
+    const availableTextHeight = frameH - frameThickness * 2 - 20 * scaleFactor;
 
     let fontSize = 82 * scaleFactor;
     const count = data.descriptors.length;
@@ -304,7 +306,7 @@ export class RenderService {
       // Baseline gap (minimum comfortable spacing)
       const minGap = 0.25 * fontSize;
 
-      const totalMinHeight = (count * fontSize) + (Math.max(0, count - 1) * minGap);
+      const totalMinHeight = count * fontSize + Math.max(0, count - 1) * minGap;
 
       if (totalMinHeight <= availableTextHeight) {
         const remainingSpace = availableTextHeight - totalMinHeight;
@@ -325,7 +327,7 @@ export class RenderService {
     }
 
     const currentLineHeight = fontSize + gap;
-    const totalTextHeight = (count * fontSize) + (Math.max(0, count - 1) * gap);
+    const totalTextHeight = count * fontSize + Math.max(0, count - 1) * gap;
 
     let textY = startY + (mainBoxHeight - totalTextHeight) / 2;
 
@@ -333,7 +335,6 @@ export class RenderService {
     if (textY < frameInnerTop + 10) {
       textY = frameInnerTop + 10;
     }
-
 
     // 2. Main White Container (The "Box")
     // If IS variable width, we already filled BG with white.
@@ -359,7 +360,7 @@ export class RenderService {
 
     // Determine target dimensions for the icon
     // It should fill the box height minus the small padding
-    const maxIconHeight = mainBoxHeight - (iconPadding * 2);
+    const maxIconHeight = mainBoxHeight - iconPadding * 2;
 
     let iconImage: any;
     let iconW = 0;
@@ -409,7 +410,7 @@ export class RenderService {
     // 4. Draw Black Frame
     const frameX = startX + frameMargin;
     const frameY = startY + frameMargin;
-    const frameW = boxWidth - (frameMargin * 2);
+    const frameW = boxWidth - frameMargin * 2;
     // Frame height logic
 
     ctx.beginPath();
@@ -418,7 +419,7 @@ export class RenderService {
       frameX + halfStroke,
       frameY + halfStroke,
       frameW - frameThickness,
-      frameH - frameThickness
+      frameH - frameThickness,
     );
     ctx.lineWidth = frameThickness;
     ctx.strokeStyle = '#1A1818';
@@ -461,7 +462,7 @@ export class RenderService {
         frameX + footerHalfStroke,
         footerFrameY + footerHalfStroke,
         frameW - footerThickness,
-        footerFrameH - footerThickness
+        footerFrameH - footerThickness,
       );
       ctx.lineWidth = footerThickness;
       ctx.strokeStyle = '#1A1818';
@@ -476,8 +477,8 @@ export class RenderService {
       ctx.textBaseline = 'middle';
       ctx.fillStyle = '#1A1818';
 
-      const footerTextX = startX + (boxWidth / 2);
-      const footerTextY = footerFrameY + (footerFrameH / 2);
+      const footerTextX = startX + boxWidth / 2;
+      const footerTextY = footerFrameY + footerFrameH / 2;
 
       ctx.fillText(interactText, footerTextX, footerTextY, frameW - textPadding);
     }

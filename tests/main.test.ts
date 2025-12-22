@@ -36,14 +36,12 @@ describe('ESRB Generator Tests', () => {
   test('Scraper should parse game data correctly', async () => {
     nock('https://www.esrb.org')
       .get('/search/')
-      .query(obj => {
+      .query((obj) => {
         return obj.searchKeyword === 'Borderlands 2';
       })
       .reply(200, mockHTML);
 
-    nock('https://www.esrb.org')
-      .get('/ratings/32333/')
-      .reply(200, mockDetailsHTML);
+    nock('https://www.esrb.org').get('/ratings/32333/').reply(200, mockDetailsHTML);
 
     const data = await scraper.getGameData('Borderlands 2', undefined, true);
 
@@ -58,14 +56,9 @@ describe('ESRB Generator Tests', () => {
   });
 
   test('Scraper should filter by platform', async () => {
-    nock('https://www.esrb.org')
-      .get('/search/')
-      .query(true)
-      .reply(200, mockHTML);
+    nock('https://www.esrb.org').get('/search/').query(true).reply(200, mockHTML);
 
-    nock('https://www.esrb.org')
-      .get('/ratings/32333/')
-      .reply(200, mockDetailsHTML);
+    nock('https://www.esrb.org').get('/ratings/32333/').reply(200, mockDetailsHTML);
 
     const data = await scraper.getGameData('Borderlands 2', 'Windows PC');
     expect(data.title).toBe('Borderlands 2');
@@ -74,17 +67,17 @@ describe('ESRB Generator Tests', () => {
   test('Scraper should throw if no result', async () => {
     nock('https://www.esrb.org')
       .get('/search/')
-      .query(obj => obj.pg == '1')
+      .query((obj) => obj.pg == '1')
       .reply(200, '<html></html>');
 
     nock('https://www.esrb.org')
       .get('/search/')
-      .query(obj => obj.pg == '2')
+      .query((obj) => obj.pg == '2')
       .reply(200, '<html></html>');
 
     nock('https://www.esrb.org')
       .get('/search/')
-      .query(obj => obj.pg == '3')
+      .query((obj) => obj.pg == '3')
       .reply(200, '<html></html>');
 
     await expect(scraper.getGameData('Unknown')).rejects.toThrow('not found');
@@ -96,7 +89,7 @@ describe('ESRB Generator Tests', () => {
       ratingCategory: 'T',
       descriptors: ['Violence'],
       interactiveElements: [],
-      platforms: 'All'
+      platforms: 'All',
     };
     const outputPath = path.join(__dirname, 'test_output.png');
 
@@ -117,7 +110,7 @@ describe('ESRB Generator Tests', () => {
       ratingCategory: 'T', // Use T as we know it exists
       descriptors: ['No Descriptors'],
       interactiveElements: [],
-      platforms: 'PC'
+      platforms: 'PC',
     };
     const outputPath = path.join(__dirname, 'test_output_nodesc.png');
 

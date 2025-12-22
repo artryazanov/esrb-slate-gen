@@ -50,15 +50,18 @@ describe('ScraperService URL Scraping', () => {
   });
 
   test('should scrape game data correctly from valid URL', async () => {
-    nock('https://www.esrb.org')
-      .get('/ratings/40649/')
-      .reply(200, mockHtml);
+    nock('https://www.esrb.org').get('/ratings/40649/').reply(200, mockHtml);
 
     const data = await scraper.getGameDataFromUrl(validUrl, true);
 
     expect(data.title).toBe('Borderlands 4');
     expect(data.ratingCategory).toBe('M');
-    expect(data.descriptors).toEqual(['Blood and Gore', 'Intense Violence', 'Sexual Themes', 'Strong Language']);
+    expect(data.descriptors).toEqual([
+      'Blood and Gore',
+      'Intense Violence',
+      'Sexual Themes',
+      'Strong Language',
+    ]);
     expect(data.interactiveElements).toEqual(['Users Interact', 'In-Game Purchases']);
     expect(data.platforms).toContain('Windows PC');
     expect(data.esrbId).toBe(40649);
@@ -71,17 +74,15 @@ describe('ScraperService URL Scraping', () => {
   });
 
   test('should throw error if title is not found', async () => {
-    nock('https://www.esrb.org')
-      .get('/ratings/40649/')
-      .reply(200, '<html><body></body></html>');
+    nock('https://www.esrb.org').get('/ratings/40649/').reply(200, '<html><body></body></html>');
 
-    await expect(scraper.getGameDataFromUrl(validUrl, true)).rejects.toThrow('Could not extract game title');
+    await expect(scraper.getGameDataFromUrl(validUrl, true)).rejects.toThrow(
+      'Could not extract game title',
+    );
   });
 
   test('should throw error on network failure', async () => {
-    nock('https://www.esrb.org')
-      .get('/ratings/40649/')
-      .replyWithError('Network Error');
+    nock('https://www.esrb.org').get('/ratings/40649/').replyWithError('Network Error');
 
     await expect(scraper.getGameDataFromUrl(validUrl, true)).rejects.toThrow('Network Error');
   });

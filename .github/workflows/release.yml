@@ -1,26 +1,25 @@
-name: CI
+name: Release
 
 on:
   push:
-    branches: [main, master]
-  pull_request:
-    branches: [main, master]
+    tags:
+      - 'v*'
 
 jobs:
-  test:
+  publish:
     runs-on: ubuntu-latest
-
-    strategy:
-      matrix:
-        node-version: [18.x, 20.x, 22.x]
+    permissions:
+      contents: read
+      id-token: write
 
     steps:
       - uses: actions/checkout@v4
 
-      - name: Use Node.js ${{ matrix.node-version }}
+      - name: Use Node.js 20.x
         uses: actions/setup-node@v4
         with:
-          node-version: ${{ matrix.node-version }}
+          node-version: '20.x'
+          registry-url: 'https://registry.npmjs.org'
           cache: 'npm'
 
       - name: Install system dependencies
@@ -31,17 +30,16 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Check formatting
-        run: npm run format:check
-
-      - name: Lint
-        run: npm run lint
-
       - name: Build
         run: npm run build
 
       - name: Download assets
         run: npm run download-assets
 
-      - name: Run tests
+      - name: Test
         run: npm test
+
+      - name: Publish to npm
+        run: npm publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
