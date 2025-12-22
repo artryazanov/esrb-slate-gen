@@ -52,7 +52,7 @@ export class ScraperService {
         throw new Error('Could not extract game title from page.');
       }
 
-      const platforms = $('.platforms-txt').text().trim();
+      const platforms = $('.platforms-txt').first().text().trim();
       const ratingImgSrc = $('.info-img img').attr('src') || '';
       const ratingCategory = this.extractRatingFromUrl(ratingImgSrc);
 
