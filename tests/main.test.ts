@@ -12,11 +12,16 @@ describe('ESRB Generator Tests', () => {
   let renderer: RenderService;
 
   beforeAll(() => {
+    nock.disableNetConnect();
     scraper = new ScraperService();
     renderer = new RenderService();
     // Ensure icons exist for renderer test
     // We already ran the download script in a previous step of the agent,
     // so assets/icons should be populated.
+  });
+
+  afterAll(() => {
+    nock.enableNetConnect();
   });
 
   afterEach(() => {

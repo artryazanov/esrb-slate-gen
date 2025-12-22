@@ -46,7 +46,12 @@ describe('ScraperService Strict Matching', () => {
   let scraper: ScraperService;
 
   beforeAll(() => {
+    nock.disableNetConnect();
     scraper = new ScraperService();
+  });
+
+  afterAll(() => {
+    nock.enableNetConnect();
   });
 
   afterEach(() => {

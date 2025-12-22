@@ -20,8 +20,13 @@ describe('ScraperService Caching', () => {
   const cacheFile = path.join(cacheDir, `${testId}.json`);
 
   beforeAll(() => {
+    nock.disableNetConnect();
     // Ensure cache dir exists (ScraperService ctor does this, but good to be sure)
     scraper = new ScraperService();
+  });
+
+  afterAll(() => {
+    nock.enableNetConnect();
   });
 
   afterEach(() => {

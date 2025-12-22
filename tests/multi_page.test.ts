@@ -45,7 +45,12 @@ describe('ScraperService Multi-Page Search', () => {
   let scraper: ScraperService;
 
   beforeAll(() => {
+    nock.disableNetConnect();
     scraper = new ScraperService();
+  });
+
+  afterAll(() => {
+    nock.enableNetConnect();
   });
 
   afterEach(() => {
