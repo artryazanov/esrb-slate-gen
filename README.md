@@ -176,10 +176,10 @@ generateSlate();
 
 This project uses **Prettier** for formatting and **ESLint** for linting. These checks are enforced in CI.
 
--   **Check Formatting:** `npm run format:check`
--   **Fix Formatting:** `npm run format`
--   **Lint:** `npm run lint`
--   **Fix Lint:** `npm run lint:fix`
+- **Check Formatting:** `npm run format:check`
+- **Fix Formatting:** `npm run format`
+- **Lint:** `npm run lint`
+- **Fix Lint:** `npm run lint:fix`
 
 ## Testing
 
