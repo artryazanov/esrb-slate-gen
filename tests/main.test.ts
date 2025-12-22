@@ -45,13 +45,16 @@ describe('ESRB Generator Tests', () => {
       .get('/ratings/32333/')
       .reply(200, mockDetailsHTML);
 
-    const data = await scraper.getGameData('Borderlands 2');
+    const data = await scraper.getGameData('Borderlands 2', undefined, true);
 
     expect(data.title).toBe('Borderlands 2');
     expect(data.ratingCategory).toBe('M');
     expect(data.descriptors).toContain('Blood and Gore');
     expect(data.descriptors).toContain('Use of Alcohol');
+    expect(data.descriptors).toContain('Use of Alcohol');
     expect(data.platforms).toContain('Windows PC');
+    expect(data.esrbId).toBe(32333);
+    expect(data.esrbUrl).toBe('https://www.esrb.org/ratings/32333/');
   });
 
   test('Scraper should filter by platform', async () => {

@@ -79,7 +79,9 @@ export class ScraperService {
         ratingCategory,
         descriptors,
         platforms,
-        interactiveElements: cleanInteractiveElements
+        interactiveElements: cleanInteractiveElements,
+        esrbId: id,
+        esrbUrl: url
       };
 
       try {

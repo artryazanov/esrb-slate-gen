@@ -54,13 +54,15 @@ describe('ScraperService URL Scraping', () => {
       .get('/ratings/40649/')
       .reply(200, mockHtml);
 
-    const data = await scraper.getGameDataFromUrl(validUrl);
+    const data = await scraper.getGameDataFromUrl(validUrl, true);
 
     expect(data.title).toBe('Borderlands 4');
     expect(data.ratingCategory).toBe('M');
     expect(data.descriptors).toEqual(['Blood and Gore', 'Intense Violence', 'Sexual Themes', 'Strong Language']);
     expect(data.interactiveElements).toEqual(['Users Interact', 'In-Game Purchases']);
     expect(data.platforms).toContain('Windows PC');
+    expect(data.esrbId).toBe(40649);
+    expect(data.esrbUrl).toBe('https://www.esrb.org/ratings/40649/');
   });
 
   test('should throw error for invalid URL format', async () => {

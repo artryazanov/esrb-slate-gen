@@ -5,10 +5,10 @@ import { Logger } from '../src/utils/logger';
 import fs from 'fs';
 
 describe('ScraperService Platform Extraction', () => {
-    let scraper: ScraperService;
-    const gameId = 99999; // Using a dummy ID to avoid conflict
-    // HTML simulating the issue with multiple platforms-txt elements
-    const mockHtml = `
+  let scraper: ScraperService;
+  const gameId = 99999; // Using a dummy ID to avoid conflict
+  // HTML simulating the issue with multiple platforms-txt elements
+  const mockHtml = `
     <!DOCTYPE html>
     <html>
       <head></head>
@@ -36,37 +36,39 @@ describe('ScraperService Platform Extraction', () => {
     </html>
   `;
 
-    beforeAll(() => {
-        scraper = new ScraperService();
-        // Mock Logger
-        jest.spyOn(Logger, 'error').mockImplementation(() => ({}) as any);
-        jest.spyOn(Logger, 'info').mockImplementation(() => ({}) as any);
-        jest.spyOn(Logger, 'warn').mockImplementation(() => ({}) as any);
+  beforeAll(() => {
+    scraper = new ScraperService();
+    // Mock Logger
+    jest.spyOn(Logger, 'error').mockImplementation(() => ({}) as any);
+    jest.spyOn(Logger, 'info').mockImplementation(() => ({}) as any);
+    jest.spyOn(Logger, 'warn').mockImplementation(() => ({}) as any);
 
-        // Mock fs.writeFileSync to avoid writing to real cache
-        jest.spyOn(fs, 'writeFileSync').mockImplementation(() => { });
-    });
+    // Mock fs.writeFileSync to avoid writing to real cache
+    jest.spyOn(fs, 'writeFileSync').mockImplementation(() => { });
+  });
 
-    afterAll(() => {
-        jest.restoreAllMocks();
-    });
+  afterAll(() => {
+    jest.restoreAllMocks();
+  });
 
-    afterEach(() => {
-        nock.cleanAll();
-    });
+  afterEach(() => {
+    nock.cleanAll();
+  });
 
-    test('should extract only the first platforms-txt occurance', async () => {
-        nock('https://www.esrb.org')
-            .get(`/ratings/${gameId}/`)
-            .reply(200, mockHtml);
+  test('should extract only the first platforms-txt occurance', async () => {
+    nock('https://www.esrb.org')
+      .get(`/ratings/${gameId}/`)
+      .reply(200, mockHtml);
 
-        // Using force=true to bypass cache reading
-        const data = await scraper.getGameParamsById(gameId, true);
+    // Using force=true to bypass cache reading
+    const data = await scraper.getGameParamsById(gameId, true);
 
-        expect(data.title).toBe('Buggy Game');
-        // It should ONLY contain the first div's content
-        expect(data.platforms).toBe('Correct Platform 1, Correct Platform 2');
-        // Ensure it does NOT contain the second div's content
-        expect(data.platforms).not.toContain('Incorrect Duplicate Platform 1');
-    });
+    expect(data.title).toBe('Buggy Game');
+    // It should ONLY contain the first div's content
+    expect(data.platforms).toBe('Correct Platform 1, Correct Platform 2');
+    // Ensure it does NOT contain the second div's content
+    expect(data.platforms).not.toContain('Incorrect Duplicate Platform 1');
+    expect(data.esrbId).toBe(gameId);
+    expect(data.esrbUrl).toBe(`https://www.esrb.org/ratings/${gameId}/`);
+  });
 });

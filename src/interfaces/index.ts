@@ -4,4 +4,6 @@ export interface ESRBData {
   descriptors: string[];
   interactiveElements: string[];
   platforms?: string;
+  esrbId?: number;
+  esrbUrl?: string;
 }
