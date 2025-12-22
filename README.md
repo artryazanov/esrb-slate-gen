@@ -155,6 +155,32 @@ generateSlate();
 | `--4k`                                                                                                 |       | Generate in 4K resolution (3840x2160)                                                                                                | No                                                                         | `false`             |
 | `--force`                                                                                              |       | Ignore cache and force re-download of game data                                                                                      | No                                                                         | `false`             |
 
+## Development
+
+### Setup
+
+1.  **Install Dependencies:**
+
+    ```bash
+    npm install
+    ```
+
+2.  **Download Assets:**
+    This script downloads necessary fonts and icons to the `assets/` directory.
+
+    ```bash
+    npm run download-assets
+    ```
+
+### Code Quality
+
+This project uses **Prettier** for formatting and **ESLint** for linting. These checks are enforced in CI.
+
+-   **Check Formatting:** `npm run format:check`
+-   **Fix Formatting:** `npm run format`
+-   **Lint:** `npm run lint`
+-   **Fix Lint:** `npm run lint:fix`
+
 ## Testing
 
 Run the test suite using Jest:
