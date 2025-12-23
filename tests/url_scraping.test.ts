@@ -38,8 +38,8 @@ describe('ScraperService URL Scraping', () => {
     nock.disableNetConnect();
     scraper = new ScraperService();
     // Mock Logger to prevent noise in tests
-    jest.spyOn(Logger, 'error').mockImplementation(() => ({}) as any);
-    jest.spyOn(Logger, 'info').mockImplementation(() => ({}) as any);
+    jest.spyOn(Logger, 'error').mockReturnThis();
+    jest.spyOn(Logger, 'info').mockReturnThis();
   });
 
   afterAll(() => {

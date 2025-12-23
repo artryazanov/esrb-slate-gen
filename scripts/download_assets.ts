@@ -19,8 +19,9 @@ async function downloadFile(filename: string) {
     const response = await axios.get(url, { responseType: 'arraybuffer' });
     fs.writeFileSync(outputPath, response.data);
     console.log(`Saved to ${outputPath}`);
-  } catch (e: any) {
-    console.error(`Failed to download ${filename}: ${e.message}`);
+  } catch (e: unknown) {
+    const msg = e instanceof Error ? e.message : String(e);
+    console.error(`Failed to download ${filename}: ${msg}`);
   }
 }
 
@@ -31,8 +32,9 @@ async function downloadFont() {
     const response = await axios.get(FONT_URL, { responseType: 'arraybuffer' });
     fs.writeFileSync(outputPath, response.data);
     console.log(`Saved font to ${outputPath}`);
-  } catch (e: any) {
-    console.error(`Failed to download font: ${e.message}`);
+  } catch (e: unknown) {
+    const msg = e instanceof Error ? e.message : String(e);
+    console.error(`Failed to download font: ${msg}`);
   }
 }
 

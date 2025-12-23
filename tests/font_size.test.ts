@@ -1,5 +1,5 @@
 import { RenderService } from '../src/services/RenderService';
-import { createCanvas, Canvas, CanvasRenderingContext2D } from 'canvas';
+import { createCanvas } from 'canvas';
 import { ESRBData } from '../src/interfaces';
 import fs from 'fs';
 import path from 'path';
@@ -16,8 +16,8 @@ jest.mock('canvas', () => {
 });
 
 describe('RenderService Font Size Constraints', () => {
-  let mockContext: any;
-  let mockCanvas: any;
+  let mockContext: Record<string, unknown>;
+  let mockCanvas: Record<string, unknown>;
 
   beforeEach(() => {
     // Reset mocks
@@ -113,9 +113,6 @@ describe('RenderService Font Size Constraints', () => {
       return match ? parseFloat(match[1]) : 0;
     };
 
-    const descriptorFontStr = fontValues.find(
-      (v) => v.includes('Arimo') && !v.includes('undefined'),
-    );
     // We expect the LAST two to be descriptor and then footer.
 
     // If there are only 2, great.

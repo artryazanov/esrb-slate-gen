@@ -65,9 +65,10 @@ describe('CLI Manual Mode', () => {
     try {
       await runCLI(args);
       fail('Should have thrown an error');
-    } catch (e: any) {
-      expect(e.error.code).toBe(1);
-      expect(e.stdout + e.stderr).toContain(
+    } catch (e: unknown) {
+      const err = e as { error: { code: number }; stdout: string; stderr: string };
+      expect(err.error.code).toBe(1);
+      expect(err.stdout + err.stderr).toContain(
         'Error: You must provide either a game title (-g), an ESRB URL (-u), an ESRB ID (-e), or a manual rating (-r).',
       );
     }
@@ -79,9 +80,10 @@ describe('CLI Manual Mode', () => {
     try {
       await runCLI(args);
       fail('Should have thrown an error');
-    } catch (e: any) {
-      expect(e.error.code).toBe(1);
-      expect(e.stdout + e.stderr).toContain(
+    } catch (e: unknown) {
+      const err = e as { error: { code: number }; stdout: string; stderr: string };
+      expect(err.error.code).toBe(1);
+      expect(err.stdout + err.stderr).toContain(
         'Error: You must provide either a game title (-g), an ESRB URL (-u), an ESRB ID (-e), or a manual rating (-r).',
       );
     }

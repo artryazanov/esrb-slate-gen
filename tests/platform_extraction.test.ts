@@ -39,9 +39,9 @@ describe('ScraperService Platform Extraction', () => {
     nock.disableNetConnect();
     scraper = new ScraperService();
     // Mock Logger
-    jest.spyOn(Logger, 'error').mockImplementation(() => ({}) as any);
-    jest.spyOn(Logger, 'info').mockImplementation(() => ({}) as any);
-    jest.spyOn(Logger, 'warn').mockImplementation(() => ({}) as any);
+    jest.spyOn(Logger, 'error').mockReturnThis();
+    jest.spyOn(Logger, 'info').mockReturnThis();
+    jest.spyOn(Logger, 'warn').mockReturnThis();
 
     // Mock fs.writeFileSync to avoid writing to real cache
     jest.spyOn(fs, 'writeFileSync').mockImplementation(() => {});

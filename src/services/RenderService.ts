@@ -1,4 +1,4 @@
-import { createCanvas, loadImage, registerFont } from 'canvas';
+import { createCanvas, loadImage, registerFont, Image } from 'canvas';
 import { ESRBData } from '../interfaces';
 import fs from 'fs';
 import path from 'path';
@@ -70,7 +70,6 @@ export class RenderService {
       Logger.info('Auto Aspect Ratio: calculating optimal width...');
       const iconAR = await this.getIconAR(data.ratingCategory);
 
-      const bestW = 21; // fallback
       let found = false;
 
       // Filter descriptors for calculation (same as render logic)
@@ -228,7 +227,7 @@ export class RenderService {
         }
         ctx.fillRect(0, 0, canvasWidth, canvasHeight);
 
-        let iconImage: any;
+        let iconImage: Image;
         let iconW = 0;
         const iconH = canvasHeight; // Full height
 
@@ -362,7 +361,7 @@ export class RenderService {
     // It should fill the box height minus the small padding
     const maxIconHeight = mainBoxHeight - iconPadding * 2;
 
-    let iconImage: any;
+    let iconImage: Image;
     let iconW = 0;
     let iconH = 0;
 
@@ -437,7 +436,7 @@ export class RenderService {
     ctx.textBaseline = 'top';
     ctx.textAlign = 'left';
 
-    data.descriptors.forEach((desc, index) => {
+    data.descriptors.forEach((desc) => {
       ctx.fillText(desc, textX, textY, maxTextWidth);
       textY += currentLineHeight;
     });

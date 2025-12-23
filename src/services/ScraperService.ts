@@ -5,6 +5,13 @@ import { Logger } from '../utils/logger';
 import fs from 'fs';
 import path from 'path';
 
+interface Candidate {
+  title: string;
+  platforms: string;
+  ratingImgSrc: string;
+  url: string;
+}
+
 export class ScraperService {
   private baseUrl = 'https://www.esrb.org/search/';
   private readonly cacheDir: string;
@@ -64,7 +71,7 @@ export class ScraperService {
         const cached = fs.readFileSync(cachePath, 'utf-8');
         Logger.info(`Loaded game params from cache for ID: ${id}`);
         return JSON.parse(cached) as ESRBData;
-      } catch (e) {
+      } catch {
         Logger.warn(`Failed to read cache for ID ${id}, will fetch from network.`);
       }
     }
@@ -145,7 +152,7 @@ export class ScraperService {
       Logger.info(`Searching for "${query}" on ESRB...`);
       const normalizedQuery = this.normalize(query);
       const normalizedPlatform = platform ? this.normalize(platform) : null;
-      let page1Candidates: any[] = [];
+      let page1Candidates: Candidate[] = [];
       const MAX_PAGES = 3;
 
       for (let page = 1; page <= MAX_PAGES; page++) {
@@ -237,7 +244,11 @@ export class ScraperService {
     }
   }
 
-  private async fetchCandidates(query: string, platform: string | undefined, page: number) {
+  private async fetchCandidates(
+    query: string,
+    platform: string | undefined,
+    page: number,
+  ): Promise<Candidate[]> {
     const searchUrl = `${this.baseUrl}?searchKeyword=${encodeURIComponent(query)}&platform=${platform ? encodeURIComponent(platform) : 'All%20Platforms'}&pg=${page}`;
 
     const { data } = await axios.get(searchUrl, {
@@ -254,13 +265,7 @@ export class ScraperService {
     const $ = cheerio.load(data);
     const gameResults = $('.game');
 
-    const candidates: {
-      element: cheerio.Cheerio<any>;
-      title: string;
-      platforms: string;
-      ratingImgSrc: string;
-      url: string;
-    }[] = [];
+    const candidates: Candidate[] = [];
 
     gameResults.each((i, el) => {
       const currentElement = $(el);
@@ -273,7 +278,6 @@ export class ScraperService {
       const fullUrl = href.startsWith('http') ? href : `https://www.esrb.org${href}`;
 
       candidates.push({
-        element: currentElement,
         title: titleText,
         platforms: platformsText,
         ratingImgSrc,
@@ -285,7 +289,7 @@ export class ScraperService {
   }
 
   private findExactMatch(
-    candidates: any[],
+    candidates: Candidate[],
     normalizedQuery: string,
     normalizedPlatform: string | null,
   ) {

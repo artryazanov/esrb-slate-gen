@@ -2,7 +2,6 @@ import { RenderService } from '../src/services/RenderService';
 import { ESRBData } from '../src/interfaces';
 import fs from 'fs';
 import path from 'path';
-import { Canvas } from 'canvas';
 
 // Mock canvas
 const mockToBuffer = jest.fn();

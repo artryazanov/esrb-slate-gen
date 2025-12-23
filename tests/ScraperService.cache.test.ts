@@ -21,10 +21,10 @@ describe('ScraperService Cache Directory', () => {
 
   test('should use default cache dir if accessible', () => {
     mockFs.existsSync.mockReturnValue(false);
-    mockFs.mkdirSync.mockReturnValue(undefined as any);
+    mockFs.mkdirSync.mockReturnValue(undefined);
     mockFs.accessSync.mockReturnValue(undefined);
 
-    const service = new ScraperService();
+    new ScraperService();
 
     const expectedPath = path.resolve(process.cwd(), '.esrb-cache');
     expect(mockFs.mkdirSync).toHaveBeenCalledWith(expectedPath, { recursive: true });
@@ -60,7 +60,7 @@ describe('ScraperService Cache Directory', () => {
       .mockImplementationOnce(() => {
         throw new Error('Permission denied');
       })
-      .mockImplementationOnce(() => undefined as any);
+      .mockImplementationOnce(() => undefined);
 
     mockFs.accessSync.mockImplementation(() => undefined);
 
