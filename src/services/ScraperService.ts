@@ -4,6 +4,7 @@ import { ESRBData } from '../interfaces';
 import { Logger } from '../utils/logger';
 import fs from 'fs';
 import path from 'path';
+import os from 'os';
 
 interface Candidate {
   title: string;
@@ -35,7 +36,7 @@ export class ScraperService {
         `Failed to initialize primary cache directory at ${preferredPath}: ${(err as Error).message}`,
       );
 
-      const fallbackPath = '/tmp';
+      const fallbackPath = os.tmpdir();
       try {
         // Check if the fallback directory is writable
         fs.accessSync(fallbackPath, fs.constants.W_OK);
