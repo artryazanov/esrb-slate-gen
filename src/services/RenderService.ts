@@ -5,8 +5,6 @@ import path from 'path';
 import { Logger } from '../utils/logger';
 
 export class RenderService {
-  private readonly WIDTH = 1920;
-  private readonly HEIGHT = 1080;
   private ASSETS_DIR = path.join(__dirname, '../../assets');
 
   constructor(options?: { assetsDir?: string }) {
