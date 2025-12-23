@@ -47,7 +47,7 @@ describe('ScraperService Cache Directory', () => {
     // 1. Primary path logic
     // existsSync(primary) -> false
     // mkdirSync(primary) -> THROWS
-    
+
     // 2. Fallback path logic
     // accessSync(/tmp) -> OK
     // existsSync(fallback) -> false
@@ -68,19 +68,29 @@ describe('ScraperService Cache Directory', () => {
 
     // Check calls
     expect(mockFs.mkdirSync).toHaveBeenCalledTimes(2);
-    
+
     // First attempt: local cache
-    expect(mockFs.mkdirSync).toHaveBeenNthCalledWith(1, expect.stringContaining(process.cwd()), expect.anything());
-    
+    expect(mockFs.mkdirSync).toHaveBeenNthCalledWith(
+      1,
+      expect.stringContaining(process.cwd()),
+      expect.anything(),
+    );
+
     // Second attempt: fallback cache in /tmp
-    expect(mockFs.mkdirSync).toHaveBeenNthCalledWith(2, expect.stringContaining('/tmp'), expect.anything());
+    expect(mockFs.mkdirSync).toHaveBeenNthCalledWith(
+      2,
+      expect.stringContaining('/tmp'),
+      expect.anything(),
+    );
   });
 
   test('should use existing fallback cache dir without creating it', () => {
     // Primary fails
     mockFs.existsSync.mockReturnValueOnce(false); // Primary does not exist
-    mockFs.mkdirSync.mockImplementationOnce(() => { throw new Error('Primary fail'); });
-    
+    mockFs.mkdirSync.mockImplementationOnce(() => {
+      throw new Error('Primary fail');
+    });
+
     // Fallback logic
     mockFs.accessSync.mockImplementation(() => undefined); // All access checks pass
     mockFs.existsSync.mockReturnValueOnce(true); // Fallback DOES exist
@@ -89,7 +99,10 @@ describe('ScraperService Cache Directory', () => {
 
     // mkdirSync called ONCE for primary (failed), NOT for fallback
     expect(mockFs.mkdirSync).toHaveBeenCalledTimes(1);
-    expect(mockFs.mkdirSync).toHaveBeenCalledWith(expect.stringContaining(process.cwd()), expect.anything());
+    expect(mockFs.mkdirSync).toHaveBeenCalledWith(
+      expect.stringContaining(process.cwd()),
+      expect.anything(),
+    );
   });
 
   test('should throw if both primary and fallback fail', () => {
@@ -99,7 +112,7 @@ describe('ScraperService Cache Directory', () => {
     });
     // Fallback access fails
     mockFs.accessSync.mockImplementation(() => {
-        throw new Error('Access denied');
+      throw new Error('Access denied');
     });
 
     expect(() => {

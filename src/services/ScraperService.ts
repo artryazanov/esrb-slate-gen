@@ -24,7 +24,9 @@ export class ScraperService {
       fs.accessSync(preferredPath, fs.constants.W_OK);
       return preferredPath;
     } catch (err) {
-      Logger.warn(`Failed to initialize primary cache directory at ${preferredPath}: ${(err as Error).message}`);
+      Logger.warn(
+        `Failed to initialize primary cache directory at ${preferredPath}: ${(err as Error).message}`,
+      );
 
       const fallbackPath = '/tmp';
       try {
@@ -41,7 +43,9 @@ export class ScraperService {
         Logger.info(`Using fallback cache directory: ${fallbackCacheDir}`);
         return fallbackCacheDir;
       } catch (fallbackErr) {
-        Logger.error(`Failed to initialize fallback cache directory at ${fallbackPath}: ${(fallbackErr as Error).message}`);
+        Logger.error(
+          `Failed to initialize fallback cache directory at ${fallbackPath}: ${(fallbackErr as Error).message}`,
+        );
         // Rethrow the original error to indicate critical failure
         throw err;
       }

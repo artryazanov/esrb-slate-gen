@@ -78,6 +78,9 @@ npm install -g esrb-slate-gen
 
 # Usage
 esrb-gen --url "https://www.esrb.org/ratings/40649/borderlands-4/"
+
+# By ID
+esrb-gen --esrb-id 40649
 ```
 
 **Manual Generation Example:**
@@ -143,10 +146,11 @@ generateSlate();
 
 | Option&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Alias | Description                                                                                                                          | Required&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Default             |
 | :----------------------------------------------------------------------------------------------------- | :---- | :----------------------------------------------------------------------------------------------------------------------------------- | :------------------------------------------------------------------------- | :------------------ |
-| `--game`                                                                                               | `-g`  | Game title to search for                                                                                                             | Yes (or -u/-r)                                                             | -                   |
+| `--game`                                                                                               | `-g`  | Game title to search for                                                                                                             | Yes (or -u/-r/-e)                                                          | -                   |
 | `--platform`                                                                                           | `-p`  | Specific platform (e.g., "Xbox", "PS5"). Used in addition to `--game`.                                                               | No                                                                         | -                   |
-| `--url`                                                                                                | `-u`  | Direct ESRB URL (e.g., https://www.esrb.org/ratings/...)                                                                             | Yes (or -g/-r)                                                             | -                   |
-| `--rating`                                                                                             | `-r`  | Manual Rating Category. Valid values: `E`, `E10plus`, `T`, `M`, `AO`, `RP`                                                           | Yes (if no -g/-u)                                                          | -                   |
+| `--url`                                                                                                | `-u`  | Direct ESRB URL (e.g., https://www.esrb.org/ratings/...)                                                                             | Yes (or -g/-r/-e)                                                          | -                   |
+| `--esrb-id`                                                                                            | `-e`  | ESRB Game ID (e.g., 40649)                                                                                                           | Yes (or -g/-r/-u)                                                          | -                   |
+| `--rating`                                                                                             | `-r`  | Manual Rating Category. Valid values: `E`, `E10plus`, `T`, `M`, `AO`, `RP`                                                           | Yes (if no -g/-u/-e)                                                       | -                   |
 | `--descriptors`                                                                                        | `-d`  | Manual Content Descriptors (comma-separated)                                                                                         | No                                                                         | -                   |
 | `--interactive`                                                                                        | `-i`  | Manual Interactive Elements (comma-separated)                                                                                        | No                                                                         | -                   |
 | `--output`                                                                                             | `-o`  | Output file path. Extensions `.png`, `.jpg`, `.jpeg` supported. Defaults to `.png` if missing/invalid.                               | No                                                                         | `output/output.png` |

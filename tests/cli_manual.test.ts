@@ -68,7 +68,7 @@ describe('CLI Manual Mode', () => {
     } catch (e: any) {
       expect(e.error.code).toBe(1);
       expect(e.stdout + e.stderr).toContain(
-        'Error: You must provide either a game title (-g), an ESRB URL (-u), or a manual rating (-r).',
+        'Error: You must provide either a game title (-g), an ESRB URL (-u), an ESRB ID (-e), or a manual rating (-r).',
       );
     }
   });
@@ -82,7 +82,7 @@ describe('CLI Manual Mode', () => {
     } catch (e: any) {
       expect(e.error.code).toBe(1);
       expect(e.stdout + e.stderr).toContain(
-        'Error: You must provide either a game title (-g), an ESRB URL (-u), or a manual rating (-r).',
+        'Error: You must provide either a game title (-g), an ESRB URL (-u), an ESRB ID (-e), or a manual rating (-r).',
       );
     }
   });

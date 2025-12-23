@@ -18,6 +18,7 @@ program
   .option('-d, --descriptors <items>', 'Comma-separated list of content descriptors')
   .option('-i, --interactive <items>', 'Comma-separated list of interactive elements')
   .option('-p, --platform <platform>', 'Game platform (optional)')
+  .option('-e, --esrb-id <id>', 'ESRB game ID')
   .option('-o, --output <path>', 'Output file path', '/output/output.png')
   .option('-a, --aspect-ratio <ratio>', 'Content aspect ratio (e.g., 16:9, auto)', 'auto')
   .option('-m, --margin <number>', 'Margin from screen edges (default: 0)', '0')
@@ -25,14 +26,24 @@ program
   .option('--force', 'Ignore cache and force re-download of game data')
   .action(async (options) => {
     try {
-      const { game, url, platform, output, margin, aspectRatio, rating, descriptors, interactive } =
-        options;
+      const {
+        game,
+        url,
+        platform,
+        output,
+        margin,
+        aspectRatio,
+        rating,
+        descriptors,
+        interactive,
+        esrbId,
+      } = options;
       const is4k = !!options['4k'];
       const force = !!options['force'];
 
-      if (!game && !url && !rating) {
+      if (!game && !url && !rating && !esrbId) {
         Logger.error(
-          'Error: You must provide either a game title (-g), an ESRB URL (-u), or a manual rating (-r).',
+          'Error: You must provide either a game title (-g), an ESRB URL (-u), an ESRB ID (-e), or a manual rating (-r).',
         );
         process.exit(1);
       }
@@ -77,7 +88,12 @@ program
       const renderer = new RenderService();
 
       let data;
-      if (url) {
+      if (esrbId) {
+        Logger.info(`Starting process for ESRB ID: ${esrbId}`);
+        if (is4k) Logger.info('Resolution: 4K (3840x2160)');
+        if (force) Logger.info('Forcing refresh (ignoring cache)');
+        data = await scraper.getGameParamsById(parseInt(esrbId, 10), force);
+      } else if (url) {
         Logger.info(`Starting process for URL: "${url}"`);
         if (is4k) Logger.info('Resolution: 4K (3840x2160)');
         if (force) Logger.info('Forcing refresh (ignoring cache)');
