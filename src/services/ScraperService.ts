@@ -7,11 +7,44 @@ import path from 'path';
 
 export class ScraperService {
   private baseUrl = 'https://www.esrb.org/search/';
-  private cacheDir = path.resolve(process.cwd(), '.esrb-cache');
+  private readonly cacheDir: string;
 
   constructor() {
-    if (!fs.existsSync(this.cacheDir)) {
-      fs.mkdirSync(this.cacheDir, { recursive: true });
+    this.cacheDir = this.ensureCacheDir();
+  }
+
+  private ensureCacheDir(): string {
+    const preferredPath = path.resolve(process.cwd(), '.esrb-cache');
+
+    try {
+      if (!fs.existsSync(preferredPath)) {
+        fs.mkdirSync(preferredPath, { recursive: true });
+      }
+      // Verify write access
+      fs.accessSync(preferredPath, fs.constants.W_OK);
+      return preferredPath;
+    } catch (err) {
+      Logger.warn(`Failed to initialize primary cache directory at ${preferredPath}: ${(err as Error).message}`);
+
+      const fallbackPath = '/tmp';
+      try {
+        // Check if the fallback directory is writable
+        fs.accessSync(fallbackPath, fs.constants.W_OK);
+        const fallbackCacheDir = path.join(fallbackPath, '.esrb-cache');
+
+        if (!fs.existsSync(fallbackCacheDir)) {
+          fs.mkdirSync(fallbackCacheDir, { recursive: true });
+        }
+        // Verify write access to the specific cache subdirectory
+        fs.accessSync(fallbackCacheDir, fs.constants.W_OK);
+
+        Logger.info(`Using fallback cache directory: ${fallbackCacheDir}`);
+        return fallbackCacheDir;
+      } catch (fallbackErr) {
+        Logger.error(`Failed to initialize fallback cache directory at ${fallbackPath}: ${(fallbackErr as Error).message}`);
+        // Rethrow the original error to indicate critical failure
+        throw err;
+      }
     }
   }
 
