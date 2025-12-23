@@ -30,7 +30,7 @@ _Example generation for [Borderlands 4](https://www.esrb.org/ratings/40649/borde
 ## Prerequisites
 
 - **Docker** (Recommended for CLI)
-- _OR_ **Node.js v18+** with system dependencies for `node-canvas` (libcairo, libpango) installed (for Library/Local usage).
+- _OR_ **Node.js v20, v22, or v24** with system dependencies for `node-canvas` (libcairo, libpango) installed (for Library/Local usage).
 
 ---
 
