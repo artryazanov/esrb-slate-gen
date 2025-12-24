@@ -16,6 +16,10 @@ _Example generation for [Borderlands 4](https://www.esrb.org/ratings/40649/borde
 ![Jest](https://img.shields.io/badge/-jest-%23C21325?style=flat&logo=jest&logoColor=white)
 [![code style: prettier](https://img.shields.io/badge/code_style-prettier-ff69b4.svg?style=flat)](https://github.com/prettier/prettier)
 
+## Web Interface
+
+Check out the **[ESRB Slate Generator Web UI](https://github.com/artryazanov/esrb-slate-gen-webui)** — A modern, responsive web interface for generating broadcast-ready ESRB rating slates. This tool serves as a frontend for the `esrb-slate-gen` library.
+
 ## Features
 
 - **Dual Mode:** Works as a CLI tool and an importable Library.
