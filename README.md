@@ -1,5 +1,14 @@
 # ESRB Rating Slate Generator
 
+[![CI](https://github.com/artryazanov/esrb-slate-gen/actions/workflows/ci.yml/badge.svg)](https://github.com/artryazanov/esrb-slate-gen/actions/workflows/ci.yml)
+[![codecov](https://codecov.io/gh/artryazanov/esrb-slate-gen/graph/badge.svg)](https://codecov.io/gh/artryazanov/esrb-slate-gen)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![npm version](https://img.shields.io/npm/v/esrb-slate-gen.svg)](https://www.npmjs.com/package/esrb-slate-gen)
+![TypeScript](https://img.shields.io/badge/typescript-%23007ACC.svg?style=flat&logo=typescript&logoColor=white)
+![Node.js](https://img.shields.io/badge/node.js-6DA55F?style=flat&logo=node.js&logoColor=white)
+![Jest](https://img.shields.io/badge/-jest-%23C21325?style=flat&logo=jest&logoColor=white)
+[![code style: prettier](https://img.shields.io/badge/code_style-prettier-ff69b4.svg?style=flat)](https://github.com/prettier/prettier)
+
 A Node.js-based tool for generating broadcast-compliant ESRB Rating Slates. This application can **scrape** the official [ESRB website](https://www.esrb.org) for game data or generate slates from **manual input**, rendering high-resolution PNG images suitable for video trailers.
 
 It can be used as a **Command Line Interface (CLI)** or imported as a **TypeScript/Node.js Library**.
@@ -7,14 +16,6 @@ It can be used as a **Command Line Interface (CLI)** or imported as a **TypeScri
 <img src="https://raw.githubusercontent.com/artryazanov/esrb-slate-gen/main/esrb-slate-example.png" alt="ESRB Slate Example" width="640" />
 
 _Example generation for [Borderlands 4](https://www.esrb.org/ratings/40649/borderlands-4/)_
-
-[![CI](https://github.com/artryazanov/esrb-slate-gen/actions/workflows/ci.yml/badge.svg)](https://github.com/artryazanov/esrb-slate-gen/actions/workflows/ci.yml)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![npm version](https://img.shields.io/npm/v/esrb-slate-gen.svg)](https://www.npmjs.com/package/esrb-slate-gen)
-![TypeScript](https://img.shields.io/badge/typescript-%23007ACC.svg?style=flat&logo=typescript&logoColor=white)
-![Node.js](https://img.shields.io/badge/node.js-6DA55F?style=flat&logo=node.js&logoColor=white)
-![Jest](https://img.shields.io/badge/-jest-%23C21325?style=flat&logo=jest&logoColor=white)
-[![code style: prettier](https://img.shields.io/badge/code_style-prettier-ff69b4.svg?style=flat)](https://github.com/prettier/prettier)
 
 ## Web Interface
 
