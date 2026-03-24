@@ -20,11 +20,11 @@ jobs:
         run: |
           # Remove 'v' prefix from tag (e.g., v1.0.0 -> 1.0.0)
           VERSION=${GITHUB_REF_NAME#v}
-          
+
           # Automatically update the version field
           sed -i -e "s/^[[:space:]]*\"version\": \".*\",/  \"version\": \"$VERSION\",/" package.json
           sed -i -e "s/\.version('.*')/.version('$VERSION')/" src/index.ts
-          
+
           git config --local user.name "github-actions[bot]"
           git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add package.json src/index.ts
