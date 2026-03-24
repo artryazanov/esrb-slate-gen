@@ -1,6 +1,6 @@
 {
   "name": "esrb-slate-gen",
-  "version": "1.0.10",
+  "version": "1.0.11",
   "description": "CLI tool to generate ESRB rating slates",
   "repository": {
     "type": "git",
