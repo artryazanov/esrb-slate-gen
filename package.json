@@ -67,7 +67,7 @@
     "test": "tests"
   },
   "overrides": {
-    "typescript": "$typescript",
-    "eslint": "$eslint"
+    "typescript": "^6.0.2",
+    "eslint": "^10.0.1"
   }
 }
