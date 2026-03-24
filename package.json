@@ -65,5 +65,9 @@
   },
   "directories": {
     "test": "tests"
+  },
+  "overrides": {
+    "typescript": "$typescript",
+    "eslint": "$eslint"
   }
 }
